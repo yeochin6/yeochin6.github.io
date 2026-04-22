@@ -34,7 +34,7 @@ function updateProgress(){
   const passed = Math.floor((now - start) / (1000*60*60*24)) + 1;
   const total = Math.floor((next - start) / (1000*60*60*24));
   const pct = Math.min(100, Math.round(passed / total * 100));
-  document.getElementById('dayText').textContent = `本年已过去 ${passed} 天 · 进度：`;
+  document.getElementById('dayText').textContent = `今年已过去 ${passed} 天 · 进度：`;
   document.getElementById('percentText').textContent = `${pct}%`;
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('worker').style.left = `calc(${pct}% - 22px)`;
