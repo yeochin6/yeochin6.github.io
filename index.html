@@ -30,13 +30,15 @@
 
     <section class="progress-wrap">
       <div class="progress-info">
-        <span id="dayText">今年已过去 0 天 · 进度：</span>
+        <span id="dayText">本年已过去 0 天 · 进度：</span>
         <span id="percentText">0%</span>
       </div>
       <div class="progress-bar" id="progressBar" aria-valuemin="0" aria-valuemax="100" role="progressbar">
         <div class="progress-fill" id="progressFill"></div>
         <div class="worker" id="worker" aria-hidden="true">
-          <svg width="40" height="40" viewBox="0 0 24 24"><circle cx="12" cy="6" r="2" fill="#fff"/><path d="M6 21c0-3 4-5 6-5s6 2 6 5" fill="#fff"/></svg>
+          <div class="worker-inner">
+            <svg class="worker-icon" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="6" r="2" fill="#fff"/><path d="M6 21c0-3 4-5 6-5s6 2 6 5" fill="#fff"/></svg>
+          </div>
         </div>
       </div>
     </section>
