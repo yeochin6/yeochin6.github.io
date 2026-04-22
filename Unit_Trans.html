@@ -6,127 +6,303 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      background: linear-gradient(120deg, #f8fafc 0%, #e0f0ff 100%);
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
       font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
       margin: 0; 
       padding: 0;
       min-height: 100vh;
+      color: #e2e8f0;
     }
     .slogan {
-      color: #267399;
-      background: linear-gradient(90deg, #cdf0ea 60%, #f9f9f9 100%);
+      color: #f0f9ff;
+      background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #7c3aed 100%);
       font-size: 1.25em;
       font-weight: bold;
       padding: 18px 4vw;
       border-bottom-left-radius: 40px 120px;
       border-bottom-right-radius: 40px 120px;
-      box-shadow: 0 4px 12px #aaa2;
-      text-shadow: 1px 1px 2px #fff7, 0 1px 0 #0a86b8;
+      box-shadow: 0 4px 25px rgba(139, 92, 246, 0.5);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
       text-align: center;
       letter-spacing: 1.5px;
+      position: relative;
+      overflow: hidden;
+    }
+    .slogan::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: shimmer 8s infinite linear;
+    }
+    @keyframes shimmer {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     .container {
       max-width: 720px;
       margin: 2.5rem auto;
-      background: #ffffffcc;
-      border-radius: 16px;
-      box-shadow: 0 6px 30px #a2cdf844;
+      background: rgba(30, 27, 55, 0.85);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 16px;      box-shadow: 0 8px 40px rgba(124, 58, 237, 0.3), 
+                  0 0 60px rgba(99, 102, 241, 0.15);
       padding: 32px 5vw 30px 5vw;
+      backdrop-filter: blur(12px);
+      position: relative;
+    }
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #6366f1, #7c3aed, #06b6d4);
+      border-radius: 16px 16px 0 0;
     }
     h2 {
       text-align: center;
-      color: #206690;
+      color: #e0e7ff;
       letter-spacing: 2px;
-      margin-bottom: 1em;
+      margin-bottom: 1.2em;
+      text-shadow: 0 0 15px rgba(167, 139, 250, 0.6);
+      font-size: 1.4em;
     }
     label {
       display: block;
       font-weight: 500;
-      color: #3580a6;
+      color: #c7d2fe;
       margin-bottom: 10px;
       font-size: 1em;
     }
     .input-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 1.5em;
+      gap: 1.2em;
       align-items: flex-end;
       margin-bottom: 2em;
+      position: relative;
     }
     textarea {
       flex: 2 1 200px;
       min-height: 80px;
       max-height: 200px;
-      border: 1.5px solid #60b6f5;
+      border: 1.5px solid #818cf8;
       font-size: 1.05em;
       border-radius: 8px;
       padding: 10px;
       resize: vertical;
-      background: #f0f9fe;
-      transition: box-shadow 0.2s;
+      background: rgba(17, 24, 39, 0.7);
+      color: #f1f5f9;
+      transition: all 0.25s ease;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+    }    textarea:focus { 
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.5), 
+                  0 0 15px rgba(167, 139, 250, 0.4); 
+      outline: none;
+      border-color: #a78bfa;
+      background: rgba(23, 30, 50, 0.9);
     }
-    textarea:focus { box-shadow: 0 0 0 2px #3ac7fa33; outline: none;}
-    select {
-      flex: 1 1 120px;
-      font-size: 1.1em;
-      border-radius: 8px;
-      padding: 10px 8px;
-      border: 1.5px solid #d0dee9;
-      margin-left: 8px;
-      background: #eafdff;
+    
+    /* 🔘 圆形单位切换按钮 */
+    .unit-toggle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #818cf8;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(55, 48, 88, 0.95));
+      color: #e0e7ff;
+      font-weight: bold;
+      font-size: 0.85em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3), 
+                  0 0 0 4px rgba(139, 92, 246, 0.15);
+      position: relative;
+      z-index: 10;
+      flex-shrink: 0;
     }
+    .unit-toggle:hover {
+      border-color: #a78bfa;
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5),
+                  0 0 0 4px rgba(167, 139, 250, 0.25);
+      transform: scale(1.05);
+    }
+    .unit-toggle.active {
+      border-color: #06b6d4;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      box-shadow: 0 0 20px rgba(124, 58, 237, 0.7);
+    }
+    
+    /* 📋 单位选择菜单（隐藏默认） */
+    .unit-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: rgba(30, 27, 55, 0.98);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      border-radius: 12px;
+      padding: 8px 0;      min-width: 160px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4),
+                  0 0 30px rgba(124, 58, 237, 0.3);
+      display: none;
+      z-index: 20;
+      animation: slideDown 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .unit-menu.show {
+      display: block;
+    }
+    .unit-item {
+      padding: 10px 16px;
+      color: #e2e8f0;
+      font-size: 0.95em;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .unit-item:hover {
+      background: linear-gradient(90deg, rgba(124, 58, 237, 0.2), transparent);
+      color: #f0f9ff;
+      padding-left: 20px;
+    }
+    .unit-item.active {
+      color: #a78bfa;
+      font-weight: 600;
+      background: rgba(139, 92, 246, 0.15);
+    }
+    .unit-item::before {
+      content: '◦';
+      color: #818cf8;
+      font-size: 1.4em;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .unit-item.active::before,
+    .unit-item:hover::before {
+      opacity: 1;
+    }
+    
     table {
       margin-top: 2em;
-      border-collapse: collapse;
-      width: 100%;
-      background: #f9fdff;
+      border-collapse: collapse;      width: 100%;
+      background: rgba(30, 27, 55, 0.6);
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 0 10px #90caf955;
+      box-shadow: 0 0 20px rgba(124, 58, 237, 0.25);
       font-size: 1em;
       word-break: break-all;
+      border: 1px solid rgba(139, 92, 246, 0.25);
     }
     th, td {
-      border-bottom: 1px solid #e0e0e0;
-      padding: 10px 8px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 12px 8px;
       text-align: center;
+      color: #e2e8f0;
+      transition: background 0.2s;
     }
     th {
-      background: #c5e3fc;
-      color: #176690;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
       font-weight: bold;
       font-size: 1.08em;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    th::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    }
+    tr:hover td {
+      background: rgba(139, 92, 246, 0.12);
     }
     tr:last-child td { border-bottom: none; }
+    
+    textarea::placeholder {
+      color: rgba(203, 213, 225, 0.6);
+    }
+    
     @media (max-width: 700px) {
       .container { padding: 16px 2vw; }
-      h2 { font-size: 1.1em; }
-      th, td { font-size: 0.94em; }
+      h2 { font-size: 1.2em; }
+      th, td { font-size: 0.92em; padding: 8px 4px; }
+      .input-row { flex-direction: column; align-items: stretch; }
+      .unit-toggle { 
+        align-self: flex-end; 
+        margin-top: -38px; 
+        margin-right: 8px;
+      }      .unit-menu {
+        right: 4px;
+        min-width: 140px;
+      }
+    }
+    
+    .glow-dot {
+      position: fixed;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: rgba(167, 139, 250, 0.8);
+      box-shadow: 0 0 10px 2px rgba(139, 92, 246, 0.6);
+      animation: float 6s infinite ease-in-out;
+      pointer-events: none;
+      z-index: -1;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.6; }
+      50% { transform: translateY(-20px) translateX(10px); opacity: 1; }
     }
   </style>
 </head>
 <body>
+<script>
+  for(let i=0; i<15; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'glow-dot';
+    dot.style.left = Math.random() * 100 + 'vw';
+    dot.style.top = Math.random() * 100 + 'vh';
+    dot.style.animationDelay = Math.random() * 6 + 's';
+    dot.style.animationDuration = (4 + Math.random() * 4) + 's';
+    document.body.appendChild(dot);
+  }
+</script>
+
 <div class="slogan" id="slogan"></div>
 <div class="container">
-  <h2>打工人专用单位换算器</h2>
-<h2>mm/μm/mil/inch/u"</h2>
+  <h2>🔬 打工人专用单位换算器</h2>
   <label>
-    请输入数据（可多行, 逗号/空格分隔）：<br>
+    请输入一组数据（可多行、用逗号或空格分隔）：<br>
   </label>
   <div class="input-row">
     <textarea
       id="batchInput"
-      placeholder="请输入……"
+      placeholder="如：1.5, 1000&#10;或者每行一个数&#10;如：2.24&#10;17.3"
       oninput="convert()"
     ></textarea>
-    <select id="unit" onchange="convert()">
-      <option value="mm">毫米 (mm)</option>
-      <option value="um">微米 (μm)</option>
-      <option value="mil">密尔 (mil)</option>
-      <option value="in">英寸 (in)</option>
-      <option value="uin">微英寸 (u")</option>
-    </select>
+    
+    <!-- 🔘 圆形单位切换按钮 -->
+    <button class="unit-toggle" id="unitToggle" title="切换单位" onclick="toggleUnitMenu()">μm</button>    
+    <!-- 📋 单位选择菜单 -->
+    <div class="unit-menu" id="unitMenu">
+      <div class="unit-item active" data-value="mm" onclick="selectUnit('mm')">毫米 (mm)</div>
+      <div class="unit-item" data-value="um" onclick="selectUnit('um')">微米 (μm)</div>
+      <div class="unit-item" data-value="mil" onclick="selectUnit('mil')">密尔 (mil)</div>
+      <div class="unit-item" data-value="in" onclick="selectUnit('in')">英寸 (in)</div>
+      <div class="unit-item" data-value="uin" onclick="selectUnit('uin')">微英寸 (u")</div>
+    </div>
   </div>
+  
   <table id="resultTable">
     <thead>
       <tr>
@@ -141,6 +317,7 @@
     <tbody id="result"></tbody>
   </table>
 </div>
+
 <script>
 // 标语库
 const slogans = [
@@ -162,73 +339,101 @@ const slogans = [
 ];
 document.getElementById('slogan').textContent = slogans[Math.floor(Math.random() * slogans.length)];
 
-// 单位转换
-const factors = {
-  mm:   1,
-  um:   1000,
-  mil:  39.370078740157,
-  in:   0.039370078740157,
-  uin:  39370.078740157
+// 单位配置
+const unitConfig = {
+  mm:  { label: 'mm',  toMM: v => v,           factor: { um: 1000, mil: 39.370078740157, in: 0.039370078740157, uin: 39370.078740157 } },  um:  { label: 'μm',  toMM: v => v/1000,      factor: { mm: 0.001, mil: 0.039370078740157, in: 0.00003937007874, uin: 39.370078740157 } },
+  mil: { label: 'mil', toMM: v => v/39.370078740157, factor: { mm: 0.0254, um: 25.4, in: 0.001, uin: 1000 } },
+  in:  { label: 'in',  toMM: v => v/0.039370078740157, factor: { mm: 25.4, um: 25400, mil: 1000, uin: 1e6 } },
+  uin: { label: 'u"',  toMM: v => v/39370.078740157, factor: { mm: 0.0000254, um: 0.0254, mil: 0.001, in: 1e-6 } }
 };
-const unitNames = {
-  mm:  "毫米 (mm)",
-  um:  "微米 (μm)",
-  mil: "密尔 (mil)",
-  in:  "英寸 (in)",
-  uin: "微英寸 (u")"
-};
-// 反向换算到mm
-function toMM(val, unit) {
-  switch(unit) {
-    case 'mm':  return val;
-    case 'um':  return val / 1000;
-    case 'mil': return val / 39.370078740157;
-    case 'in':  return val / 0.039370078740157;
-    case 'uin': return val / 39370.078740157;
-    default: return 0;
+
+let currentUnit = 'um'; // 默认单位
+
+// 切换单位菜单显示/隐藏
+function toggleUnitMenu() {
+  const menu = document.getElementById('unitMenu');
+  const btn = document.getElementById('unitToggle');
+  const isOpen = menu.classList.contains('show');
+  
+  // 先关闭所有菜单
+  document.querySelectorAll('.unit-menu').forEach(m => m.classList.remove('show'));
+  document.querySelectorAll('.unit-toggle').forEach(b => b.classList.remove('active'));
+  
+  if (!isOpen) {
+    menu.classList.add('show');
+    btn.classList.add('active');
   }
 }
-// 格式化
+
+// 选择单位
+function selectUnit(unit) {
+  currentUnit = unit;
+  document.getElementById('unitToggle').textContent = unitConfig[unit].label;
+  
+  // 更新菜单激活状态
+  document.querySelectorAll('.unit-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.value === unit);
+  });
+  
+  // 关闭菜单
+  document.getElementById('unitMenu').classList.remove('show');
+  document.getElementById('unitToggle').classList.remove('active');
+  
+  // 重新计算
+  convert();
+}
+
+// 点击外部关闭菜单
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.input-row')) {
+    document.getElementById('unitMenu').classList.remove('show');
+    document.getElementById('unitToggle').classList.remove('active');
+  }
+});
+// 格式化数字
 function fmt(n) {
   let s = (+n).toFixed(6).replace(/\.?0+$/, "");
   return s.length > 14 ? (+n).toExponential(6) : s;
 }
 
-// 支持批量换算
+// 核心换算逻辑
 function convert() {
   const input = document.getElementById('batchInput').value;
-  const unit = document.getElementById('unit').value;
-  // 拆分支持多行/逗号/空格
-  let nums = [];
+  const nums = [];
+  
   input.split(/[\n;]/).forEach(line => {
     line.split(/[\s,，]+/).forEach(cell => {
       if(cell.trim().length) nums.push(cell.trim());
     });
   });
+  
   let html = "";
   if(nums.length === 0) {
-    html = `<tr><td colspan="6" style="color:#888">请输入要换算的数据</td></tr>`;
+    html = `<tr><td colspan="6" style="color:#94a3b8">✨ 请输入要换算的数据</td></tr>`;
   } else {
+    const config = unitConfig[currentUnit];
     for(const n of nums) {
       let val = parseFloat(n);
       if(isNaN(val)) {
-        html += `<tr><td style="color:#ff6666;font-style:italic;">${n}</td>
-                  <td colspan="5" style="color:#f99;">无效数字</td></tr>`;
+        html += `<tr><td style="color:#f87171;font-style:italic;">${n}</td>
+                  <td colspan="5" style="color:#fca5a5;">⚠️ 无效数字</td></tr>`;
         continue;
       }
-      let mmValue = toMM(val, unit);
+      let mmValue = config.toMM(val);
       html += `<tr>
-        <td style="color: #157bb8;"><strong>${fmt(val)}</strong></td>
-        <td>${fmt(mmValue)}</td>
-        <td>${fmt(mmValue * factors.um)}</td>
-        <td>${fmt(mmValue * factors.mil)}</td>
-        <td>${fmt(mmValue * factors.in)}</td>
-        <td>${fmt(mmValue * factors.uin)}</td>
+        <td style="color: #818cf8;"><strong>${fmt(val)}</strong> ${unitConfig[currentUnit].label}</td>
+        <td style="color:#a5b4fc">${fmt(mmValue)}</td>
+        <td style="color:#a5b4fc">${fmt(mmValue * 1000)}</td>
+        <td style="color:#a5b4fc">${fmt(mmValue * 39.370078740157)}</td>
+        <td style="color:#a5b4fc">${fmt(mmValue * 0.039370078740157)}</td>
+        <td style="color:#a5b4fc">${fmt(mmValue * 39370.078740157)}</td>
       </tr>`;
     }
   }
   document.getElementById('result').innerHTML = html;
 }
+
+// 初始化
 convert();
 </script>
 </body>
