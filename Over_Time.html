@@ -425,10 +425,6 @@
       let input = document.getElementById('modal-input-hours');
       let dateLabel = document.getElementById('modal-date-label');
       const date = new Date(key);
-      // 今日及之前可填，未来不可填
-      let today = new Date();
-      today.setHours(0,0,0,0);
-      if(date > today) return;
       // 读旧值
       let isWk = isWeekend(date), max = isWk?8:4;
       let data = loadData();
