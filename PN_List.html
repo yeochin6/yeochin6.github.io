@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>PCB料号清单 · 工艺驾驶舱</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg: #f8f9fc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #5a6c7d;
+            --blue: #3b82f6;
+            --orange: #f97316;
+            --purple: #8b5cf6;
+            --gradient: linear-gradient(135deg, #5b8def 0%, #7c6ff7 40%, #8b5cf6 70%, #a78bfa 100%);
+            --gradient-subtle: linear-gradient(135deg, rgba(91,141,239,0.08) 0%, rgba(139,92,246,0.08) 100%);
+            --gradient-primary: linear-gradient(135deg, #5b8def, #8b5cf6);
+            --shadow-sm: 0 2px 6px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 8px 20px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+            --radius-lg: 24px;
+            --radius: 18px;
+            --glow: 0 0 0 3px rgba(139, 92, 246, 0.2), 0 0 20px rgba(139, 92, 246, 0.3);
+            --font-mono: 'SF Mono', 'Cascadia Code', monospace;
+        }
+        body {
+            background: var(--bg);
+            font-family: 'Inter', 'PingFang SC', system-ui, sans-serif;
+            color: var(--text);
+            line-height: 1.5;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.25;
+            background-image: radial-gradient(circle, rgba(139,92,246,0.1) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 1rem 2rem;
+        }
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .title-area {
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .logo-icon {
+            font-size: 2rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.01em;
+        }
+        .settings-gear {
+            background: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #8b5cf6;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid rgba(139,92,246,0.2);
+        }
+        .settings-gear:active { transform: scale(0.94); }
+
+        /* 设置菜单 */
+        .settings-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .settings-menu.active { visibility: visible; opacity: 1; }
+        .settings-panel {
+            background: white;
+            width: 85%;
+            max-width: 340px;
+            border-radius: 2rem;
+            padding: 1.5rem 1.2rem;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+        }
+        .settings-panel h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .menu-label { font-weight: 600; font-size: 0.85rem; }
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+            background: #f1f5f9;
+            padding: 0.2rem;
+            border-radius: 2rem;
+        }
+        .view-opt {
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+        .view-opt.active { background: var(--gradient); color: white; }
+        .switch-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .switch-label input { width: 1.1rem; height: 1.1rem; accent-color: #8b5cf6; }
+        .menu-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: space-around;
+        }
+        .menu-btn {
+            flex: 1;
+            background: #f1f5f9;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+        .menu-btn.primary { background: var(--gradient-primary); color: white; }
+
+        /* 大卡片样式 - 优化头部间距 */
+        .cards-list { display: flex; flex-direction: column; gap: 1.2rem; }
+        .pcb-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(139,92,246,0.12);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .pcb-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 1rem;
+            bottom: 1rem;
+            width: 5px;
+            background: var(--gradient-primary);
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 6px rgba(139,92,246,0.3);
+            z-index: 1;
+        }
+        .pcb-card:active {
+            transform: scale(0.99);
+            box-shadow: var(--glow), var(--shadow-md);
+            border-color: rgba(139, 92, 246, 0.6);
+            transition: 0.05s;
+        }
+        .card-header {
+            padding: 1rem 1rem 0.8rem 1rem;
+            background: #ffffff;
+            cursor: pointer;
+        }
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 0.6rem;
+        }
+        .left-title {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .complete-checkbox {
+            width: 1.2rem;
+            height: 1.2rem;
+            accent-color: #8b5cf6;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .pn-large {
+            font-size: 1.25rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: var(--font-mono);
+            letter-spacing: -0.3px;
+        }
+        .terminal-badge {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .right-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .delete-btn {
+            background: rgba(229, 62, 62, 0.1);
+            width: 28px;
+            height: 28px;
+            border-radius: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #e53e3e;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+        }
+        .delete-btn:active { transform: scale(0.9); background: rgba(229, 62, 62, 0.2); }
+        .arrow-icon {
+            color: #8b5cf6;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .arrow-icon.expanded { transform: rotate(90deg); }
+
+        /* 日期行：增加上边距，优化间距 */
+        .dates-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.4rem;
+            padding-top: 0.2rem;
+        }
+        .start-date {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .right-dates {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .due-badge {
+            font-weight: 700;
+            padding: 0.25rem 0.7rem;
+            border-radius: 40px;
+            background: #eef2ff;
+            color: #1e293b;
+        }
+        .due-badge.warning-yellow { background: #fef9c3; color: #854d0e; }
+        .due-badge.warning-red { background: #fee2e2; color: #b91c1c; }
+        .prev-version-badge {
+            background: #f3e8ff;
+            color: #7e3af2;
+            padding: 0.25rem 0.7rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .card-detail {
+            display: none;
+            padding: 0 1rem 1rem 1rem;
+            border-top: 1px solid #edf2f7;
+            background: #fefefe;
+        }
+        .card-detail.open { display: block; }
+
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem 1rem;
+            background: #fafbff;
+            border-radius: 1.2rem;
+            padding: 0.8rem;
+            margin: 0.6rem 0;
+        }
+        .param-row {
+            display: flex;
+            align-items: baseline;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .param-label {
+            font-weight: 700;
+            min-width: 70px;
+            color: #4b5563;
+        }
+        .param-value {
+            color: #0f172a;
+            word-break: break-word;
+            cursor: pointer;
+            display: inline-block;
+            padding: 0 0.2rem;
+            border-radius: 0.3rem;
+            transition: background 0.1s;
+        }
+        .param-value:active { background: #e9e9ff; }
+
+        .hole-section {
+            background: #f1f5f9;
+            border-radius: 1rem;
+            padding: 0.6rem 0.9rem;
+            margin: 0.6rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+        }
+        .hole-section span {
+            cursor: pointer;
+            padding: 0.1rem 0.2rem;
+            border-radius: 0.3rem;
+        }
+        .hole-section span:active { background: #e9e9ff; }
+        .chart-wrapper {
+            margin: 0.6rem 0 0.8rem;
+            background: white;
+            border-radius: 1rem;
+            padding: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        canvas.scaling-canvas { width: 100%; max-height: 180px; }
+        .card-actions {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: flex-end;
+            margin-top: 0.6rem;
+        }
+        .action-btn {
+            background: var(--gradient-primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .action-btn-outline {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+        }
+
+        /* 时间轴 */
+        .timeline-view { position: relative; padding-left: 2rem; margin-top: 1rem; }
+        .timeline-line { position: absolute; left: 0.7rem; top: 0; bottom: 0; width: 3px; background: var(--gradient); border-radius: 3px; opacity: 0.4; }
+        .timeline-item { position: relative; margin-bottom: 1rem; }
+        .timeline-dot { position: absolute; left: -1.3rem; width: 0.8rem; height: 0.8rem; background: #8b5cf6; border-radius: 50%; box-shadow: 0 0 0 2px white, 0 0 0 4px rgba(139,92,246,0.2); }
+        .timeline-bubble { background: white; border-radius: 1.5rem; padding: 0.6rem 1rem; box-shadow: var(--shadow-sm); border: 1px solid rgba(139,92,246,0.2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; cursor: pointer; }
+
+        /* 模态框 */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(5px); z-index: 1000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: 0.2s; }
+        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-card { background: white; width: 92%; max-width: 880px; max-height: 85vh; overflow-y: auto; border-radius: 1.8rem; padding: 1.2rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .full-width { grid-column: span 2; }
+        .form-field label { font-weight: 600; font-size: 0.7rem; color: #5a6c7d; }
+        .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 0.5rem 0.7rem; border-radius: 1rem; border: 1.5px solid #e2e8f0; font-size: 0.75rem; }
+        .hole-group { border-left: 3px solid #8b5cf6; margin-bottom: 0.8rem; padding-left: 0.6rem; }
+        .hole-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.5rem; }
+        .btn-icon { background: none; border: none; color: #8b5cf6; cursor: pointer; font-size: 0.9rem; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.2rem; }
+        .btn { background: white; border: 1px solid #e2e8f0; padding: 0.4rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+        .btn-primary { background: var(--gradient); border: none; color: white; }
+
+        @media (max-width: 560px) {
+            .params-grid { grid-template-columns: 1fr; }
+            .title-row { flex-direction: column; align-items: flex-start; }
+            .right-actions { align-self: flex-end; margin-top: -2rem; }
+            .dates-row { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+        }
+        .clickable-num {
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .clickable-num:active { background: #e9e9ff; }
+    </style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+<div class="bg-grid"></div>
+<div class="container">
+    <div class="page-header">
+        <div class="title-area"><div class="logo-icon"><i class="fa-solid fa-microchip"></i></div><h1>PCB料号清单</h1></div>
+        <div style="display: flex; gap: 0.6rem;"><div class="settings-gear" id="addQuickBtn"><i class="fa-solid fa-plus"></i></div><div class="settings-gear" id="settingsGear"><i class="fa-solid fa-sliders-h"></i></div></div>
+    </div>
+    <div id="cardsContainer" class="cards-list"></div>
+    <div id="timelineContainer" class="timeline-view" style="display: none;"></div>
+</div>
+
+<!-- 设置菜单 -->
+<div id="settingsMenu" class="settings-menu"><div class="settings-panel"><h3><i class="fa-regular fa-sliders-h"></i> 界面设置</h3>
+    <div class="menu-item"><span class="menu-label">📇 显示模式</span><div class="view-toggle" id="viewToggle"><button class="view-opt" data-view="card">大卡片</button><button class="view-opt" data-view="timeline">时间轴</button></div></div>
+    <div class="menu-item"><span class="menu-label">📁 隐藏已结案</span><label class="switch-label"><input type="checkbox" id="hideCompletedSwitch"> 隐藏</label></div>
+    <div class="menu-buttons"><button class="menu-btn" id="backupBtn"><i class="fa-solid fa-database"></i> 备份</button><button class="menu-btn" id="restoreBtn"><i class="fa-solid fa-arrow-up-from-bracket"></i> 恢复</button><button class="menu-btn" id="exportTableBtn"><i class="fa-solid fa-table-list"></i> 表格</button></div>
+    <input type="file" id="restoreFileInput" style="display:none;" accept=".json"><div style="margin-top: 1rem; text-align: center;"><button class="menu-btn" id="closeSettingsBtn">关闭</button></div>
+</div></div>
+
+<!-- 编辑模态框 -->
+<div id="pcbModal" class="modal-overlay"><div class="modal-card"><h3 id="modalTitle" style="font-size:1.3rem;">✏️ 编辑料号</h3>
+    <div class="form-grid">
+        <div class="form-field"><label>料号 *</label><input id="pn"></div>
+        <div class="form-field"><label>结构</label><input id="structure"></div>
+        <div class="form-field"><label>材料</label><input id="material"></div>
+        <div class="form-field"><label>类别</label><input id="category"></div>
+        <div class="form-field"><label>应用终端</label><input id="appTerminal"></div>
+        <div class="form-field"><label>投料日</label><input type="date" id="startDate"></div>
+        <div class="form-field"><label>CORE</label><input id="coreParam" placeholder="例: 2.1 T/T"></div>
+        <div class="form-field"><label>板厚 (mil)</label><input id="boardThickness" type="number" step="0.1" placeholder="厚度(mil)"></div>
+        <div class="form-field"><label>Line/Space (mil)</label><input id="lineSpace" placeholder="线宽/线距(mil)"></div>
+        <div class="form-field"><label>DRC</label><input id="drcParam" placeholder="设计规则"></div>
+        <div class="form-field"><label>面铜厚度 (mil)</label><input id="copperThick" type="number" step="0.1" placeholder="面铜(mil)"></div>
+        <div class="form-field"><label>油墨</label><input id="inkInfo"></div>
+        <div class="form-field"><label>POFV</label><select id="pofv"><option>无</option><option>有</option></select></div>
+        <div class="form-field"><label>表面处理</label><input id="surfaceFinish"></div>
+        <div class="form-field"><label>交期</label><input type="date" id="dueDate"></div>
+        <div class="form-field"><label>前版 (例如 Q6M032)</label><input id="prevVersion" placeholder="如 Q6M032"></div>
+    </div>
+    <div class="full-width"><label>钻孔参数 (孔径单位 mil)</label><div id="holeEditorContainer"></div></div>
+    <div class="full-width"><label>自定义工艺参数</label><div id="customEditorContainer"></div><button type="button" class="btn-icon" id="addCustomFieldBtn"><i class="fa-solid fa-plus-circle"></i> 添加</button></div>
+    <div class="modal-footer"><button class="btn" id="closeModalBtn">取消</button><button class="btn btn-primary" id="savePcbBtn">保存</button></div>
+</div></div>
+
+<!-- 缩放比模态框 -->
+<div id="scaleModal" class="modal-overlay"><div class="modal-card"><h3>🔧 编辑站别缩放比 <span id="scaleModalPid"></span></h3><div id="stationEditorList"></div><button class="btn btn-primary" id="addStationScaleBtn" style="margin:0.5rem 0;">+ 新增站别</button><div class="modal-footer"><button class="btn" id="closeScaleModalBtn">取消</button><button class="btn btn-primary" id="saveScaleBtn">保存</button></div></div></div>
+
+<script>
+    // 粒子背景 (保持不变)
+    const canvas = document.getElementById('particle-canvas');
+    let ctx = canvas.getContext('2d');
+    let particles = [];
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    function initParticles() { particles = []; for (let i = 0; i < 50; i++) { particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, radius: Math.random() * 2 + 1, alpha: Math.random() * 0.4 + 0.1, vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2 }); } }
+    function drawParticles() { if (!ctx) return; ctx.clearRect(0, 0, canvas.width, canvas.height); for (let p of particles) { ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fillStyle = `rgba(139, 92, 246, ${p.alpha})`; ctx.fill(); p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0; if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0; } requestAnimationFrame(drawParticles); }
+    window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+    resizeCanvas(); initParticles(); drawParticles();
+
+    // 单位换算常量 (存储始终为微米，显示/输入默认使用 mil)
+    const UM_TO_MIL = 0.0393701;
+    function umToMil(um) { return um * UM_TO_MIL; }
+    function milToUm(mil) { return mil / UM_TO_MIL; }
+    function formatNumber(value, decimals = 2) { return parseFloat(value).toFixed(decimals); }
+
+    // 默认显示单位：mil (卡片中数值默认显示 mil)
+    let currentDisplayUnit = 'mil';
+    function makeClickableNumber(umValue) {
+        if (umValue === undefined || umValue === null || umValue === '') return '<span class="param-value">—</span>';
+        let um = parseFloat(umValue);
+        if (isNaN(um)) return `<span class="param-value">${escapeHtml(umValue)}</span>`;
+        const mil = umToMil(um);
+        const displayMil = formatNumber(mil, 2) + ' mil';
+        const displayUm = formatNumber(um, 1) + ' μm';
+        return `<span class="param-value clickable-num" data-um-value="${um}" data-current-unit="mil" style="cursor:pointer;">${displayMil}</span>`;
+    }
+
+    function bindUnitToggleEvents() {
+        document.querySelectorAll('.clickable-num').forEach(el => {
+            if (el.hasAttribute('data-bound')) return;
+            el.setAttribute('data-bound', 'true');
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const umVal = parseFloat(el.getAttribute('data-um-value'));
+                if (isNaN(umVal)) return;
+                const currentUnit = el.getAttribute('data-current-unit');
+                const mil = umToMil(umVal);
+                if (currentUnit === 'mil') {
+                    el.innerText = formatNumber(umVal, 1) + ' μm';
+                    el.setAttribute('data-current-unit', 'um');
+                } else {
+                    el.innerText = formatNumber(mil, 2) + ' mil';
+                    el.setAttribute('data-current-unit', 'mil');
+                }
+            });
+        });
+    }
+
+    function renderHoleValue(diameterUm) {
+        if (diameterUm === undefined || diameterUm === null) return '—';
+        let um = parseFloat(diameterUm);
+        if (isNaN(um)) return escapeHtml(diameterUm);
+        const mil = umToMil(um);
+        const displayMil = formatNumber(mil, 2) + ' mil';
+        return `<span class="clickable-num" data-um-value="${um}" data-current-unit="mil" style="cursor:pointer;">${displayMil}</span>`;
+    }
+
+    // 数据模型
+    let pcbList = [];
+    let currentView = 'card';
+    let hideCompleted = false;
+    let chartInstances = new Map();
+
+    const DEFAULT_STATIONS = [
+        { station: "内层蚀刻", xRatio: 1.000125, yRatio: 0.999875 },
+        { station: "压合", xRatio: 0.999955, yRatio: 1.000042 },
+        { station: "钻孔", xRatio: 1.000002, yRatio: 1.000001 },
+        { station: "外层线路", xRatio: 1.000310, yRatio: 0.999920 }
+    ];
+
+    function todayStr() { return new Date().toISOString().slice(0,10); }
+    function formatDateShort(d) { if(!d) return '—'; let t = new Date(d); return `${t.getMonth()+1}/${t.getDate()}`; }
+    function genId() { return Date.now() + '-' + Math.random().toString(36).substr(2, 8); }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+
+    function getDefaultDataset() {
+        const holesDemo = { blind:[{diameter:100,count:240}], buried:[], through:[{diameter:300,count:580}], backdrill:[] };
+        return [
+            { id: genId(), pn: "Q24M568A", isCompleted: false, startDate: "2026-05-20", completeDate: null, dueDate: "2026-06-10",
+              structure: "6层 3+3", material: "FR4 TG170", category: "刚性板", appTerminal: "工业控制", copperThick: "35", inkInfo: "绿色油墨", pofv: "无", surfaceFinish: "ENIG",
+              coreParam: "2.1 T/T", boardThickness: "1600", lineSpace: "100/100", drcParam: "6mil", holes: holesDemo, scalingStations: JSON.parse(JSON.stringify(DEFAULT_STATIONS)), customFields: [{key:"耐压测试", value:"1500V"}], prevVersion: "Q6M032" },
+            { id: genId(), pn: "T15M322A", isCompleted: false, startDate: "2026-05-18", completeDate: null, dueDate: "2026-06-05",
+              structure: "8层任意阶", material: "M6", category: "HDI", appTerminal: "智能手机", copperThick: "18", inkInfo: "黑色油墨", pofv: "有", surfaceFinish: "ENEPIG",
+              coreParam: "1.5 T/T", boardThickness: "1200", lineSpace: "75/75", drcParam: "4mil", holes: { blind:[{diameter:80,count:1200}], buried:[], through:[{diameter:200,count:450}], backdrill:[] },
+              scalingStations: JSON.parse(JSON.stringify(DEFAULT_STATIONS)), customFields: [{key:"阻抗控制", value:"50±5%"}], prevVersion: "" }
+        ];
+    }
+
+    function saveToLocal() { localStorage.setItem('pcb_ultimate_data', JSON.stringify(pcbList)); }
+    function loadFromLocal() {
+        const raw = localStorage.getItem('pcb_ultimate_data');
+        if(raw) { try { pcbList = JSON.parse(raw); if(!pcbList.length) pcbList = getDefaultDataset(); } catch(e) { pcbList = getDefaultDataset(); } }
+        else { pcbList = getDefaultDataset(); }
+        pcbList.forEach(p => {
+            if(!p.customFields) p.customFields = [];
+            if(!p.dueDate) p.dueDate = new Date(Date.now() + 14*86400000).toISOString().slice(0,10);
+            if(!p.scalingStations) p.scalingStations = JSON.parse(JSON.stringify(DEFAULT_STATIONS));
+            if(p.startDate === undefined) p.startDate = todayStr();
+            if(p.isCompleted === undefined) p.isCompleted = false;
+            if(!p.holes) p.holes = { blind:[], buried:[], through:[], backdrill:[] };
+            if(p.coreParam === undefined) p.coreParam = "";
+            if(p.boardThickness === undefined) p.boardThickness = "";
+            if(p.lineSpace === undefined) p.lineSpace = "";
+            if(p.drcParam === undefined) p.drcParam = "";
+            if(p.copperThick === undefined) p.copperThick = "";
+            if(p.prevVersion === undefined) p.prevVersion = "";
+        });
+        sortByCompletion();
+        saveToLocal();
+    }
+    function sortByCompletion() { pcbList.sort((a,b) => a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1); }
+    function getFilteredList() { return hideCompleted ? pcbList.filter(p => !p.isCompleted) : pcbList; }
+    function getDueClass(due) { if(!due) return ''; const diff = Math.ceil((new Date(due) - new Date()) / 86400000); if(diff <= 3) return 'warning-red'; if(diff <= 5) return 'warning-yellow'; return ''; }
+
+    let currentlyOpenCardId = null;
+
+    // 渲染大卡片 (优化布局)
+    function renderCardView() {
+        const container = document.getElementById('cardsContainer');
+        const timelineDiv = document.getElementById('timelineContainer');
+        container.style.display = 'flex';
+        timelineDiv.style.display = 'none';
+        container.innerHTML = '';
+        const filtered = getFilteredList();
+        filtered.forEach(pcb => {
+            const card = document.createElement('div'); card.className = 'pcb-card'; card.dataset.id = pcb.id;
+            const dueClass = getDueClass(pcb.dueDate);
+            const prevHtml = pcb.prevVersion ? `<span class="prev-version-badge"><i class="fa-regular fa-bookmark"></i> 前版: ${escapeHtml(pcb.prevVersion)}</span>` : '';
+            const header = document.createElement('div'); header.className = 'card-header';
+            header.innerHTML = `
+                <div class="title-row">
+                    <div class="left-title">
+                        <input type="checkbox" class="complete-checkbox" ${pcb.isCompleted ? 'checked' : ''} data-id="${pcb.id}">
+                        <span class="pn-large">${escapeHtml(pcb.pn)}</span>
+                        <span class="terminal-badge"><i class="fa-regular fa-building"></i> ${escapeHtml(pcb.appTerminal||'—')}</span>
+                    </div>
+                    <div class="right-actions">
+                        <button class="delete-btn" data-id="${pcb.id}" title="删除料号"><i class="fa-regular fa-trash-can"></i></button>
+                        <span class="arrow-icon"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                </div>
+                <div class="dates-row">
+                    <span class="start-date"><i class="fa-regular fa-calendar-alt"></i> 投料: ${pcb.startDate||'—'}</span>
+                    <div class="right-dates">
+                        <span class="due-badge ${dueClass}"><i class="fa-regular fa-clock"></i> 交期: ${pcb.dueDate ? formatDateShort(pcb.dueDate) : '—'}</span>
+                        ${prevHtml}
+                    </div>
+                </div>
+            `;
+            const detail = document.createElement('div'); detail.className = 'card-detail'; detail.id = `detail-${pcb.id}`;
+            const holes = pcb.holes || {};
+            const blindHtml = holes.blind?.map(h => `${renderHoleValue(h.diameter)}/${h.count}`).join(', ') || '无';
+            const buriedHtml = holes.buried?.map(h => `${renderHoleValue(h.diameter)}/${h.count}`).join(', ') || '无';
+            const thruHtml = holes.through?.map(h => `${renderHoleValue(h.diameter)}/${h.count}`).join(', ') || '无';
+            const backHtml = holes.backdrill?.map(h => `${renderHoleValue(h.diameter)}/${h.count}`).join(', ') || '无';
+            let customHtml = '';
+            if(pcb.customFields?.length) customHtml = `<div class="param-row"><span class="param-label">• 自定义</span><span class="param-value">${pcb.customFields.map(c=>`${c.key}: ${c.value}`).join(' ; ')}</span></div>`;
+            const chartId = `chart-${pcb.id}`;
+            detail.innerHTML = `
+                <div class="params-grid">
+                    <div class="param-row"><span class="param-label">• 结构</span><span class="param-value">${escapeHtml(pcb.structure||'—')}</span></div>
+                    <div class="param-row"><span class="param-label">• 材料</span><span class="param-value">${escapeHtml(pcb.material||'—')}</span></div>
+                    <div class="param-row"><span class="param-label">• 类别</span><span class="param-value">${escapeHtml(pcb.category||'—')}</span></div>
+                    <div class="param-row"><span class="param-label">• CORE</span><span class="param-value">${escapeHtml(pcb.coreParam||'—')}</span></div>
+                    <div class="param-row"><span class="param-label">• 板厚</span>${pcb.boardThickness ? makeClickableNumber(pcb.boardThickness) : '<span class="param-value">—</span>'}</div>
+                    <div class="param-row"><span class="param-label">• Line/Space</span><span class="param-value">${escapeHtml(pcb.lineSpace||'—')}</span></div>
+                    <div class="param-row"><span class="param-label">• DRC</span><span class="param-value">${escapeHtml(pcb.drcParam||'—')}</span></div>
+                    <div class="param-row"><span class="param-label">• 面铜</span>${pcb.copperThick ? makeClickableNumber(pcb.copperThick) : '<span class="param-value">—</span>'}</div>
+                    <div class="param-row"><span class="param-label">• 油墨</span><span class="param-value">${escapeHtml(pcb.inkInfo||'—')}</span></div>
+                    <div class="param-row"><span class="param-label">• POFV</span><span class="param-value">${pcb.pofv||'无'}</span></div>
+                    <div class="param-row"><span class="param-label">• 表面处理</span><span class="param-value">${escapeHtml(pcb.surfaceFinish||'—')}</span></div>
+                    ${customHtml}
+                </div>
+                <div class="hole-section">
+                    <span><strong>盲孔:</strong> ${blindHtml}</span>
+                    <span><strong>埋孔:</strong> ${buriedHtml}</span>
+                    <span><strong>通孔:</strong> ${thruHtml}</span>
+                    <span><strong>背钻:</strong> ${backHtml}</span>
+                </div>
+                <div class="chart-wrapper"><canvas id="${chartId}" class="scaling-canvas"></canvas></div>
+                <div class="card-actions">
+                    <button class="action-btn edit-scale-btn" data-id="${pcb.id}">缩放比</button>
+                    <button class="action-btn action-btn-outline edit-params-btn" data-id="${pcb.id}">工艺</button>
+                </div>
+            `;
+            card.appendChild(header); card.appendChild(detail); container.appendChild(card);
+            
+            bindUnitToggleEvents();
+            
+            header.addEventListener('click', (e) => {
+                if (e.target.closest('.complete-checkbox') || e.target.closest('.delete-btn')) return;
+                const isOpen = detail.classList.contains('open');
+                if (isOpen) {
+                    detail.classList.remove('open');
+                    const arrow = card.querySelector('.arrow-icon');
+                    if (arrow) arrow.classList.remove('expanded');
+                    if (currentlyOpenCardId === pcb.id) currentlyOpenCardId = null;
+                } else {
+                    if (currentlyOpenCardId && currentlyOpenCardId !== pcb.id) {
+                        const prevCard = document.querySelector(`.pcb-card[data-id="${currentlyOpenCardId}"]`);
+                        if (prevCard) {
+                            const prevDetail = prevCard.querySelector('.card-detail');
+                            const prevArrow = prevCard.querySelector('.arrow-icon');
+                            if (prevDetail) prevDetail.classList.remove('open');
+                            if (prevArrow) prevArrow.classList.remove('expanded');
+                        }
+                    }
+                    detail.classList.add('open');
+                    const arrow = card.querySelector('.arrow-icon');
+                    if (arrow) arrow.classList.add('expanded');
+                    currentlyOpenCardId = pcb.id;
+                    initChartForCard(pcb.id, pcb.scalingStations);
+                }
+            });
+            const arrowSpan = card.querySelector('.arrow-icon');
+            if (arrowSpan) {
+                arrowSpan.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = detail.classList.contains('open');
+                    if (isOpen) {
+                        detail.classList.remove('open');
+                        arrowSpan.classList.remove('expanded');
+                        if (currentlyOpenCardId === pcb.id) currentlyOpenCardId = null;
+                    } else {
+                        if (currentlyOpenCardId && currentlyOpenCardId !== pcb.id) {
+                            const prevCard = document.querySelector(`.pcb-card[data-id="${currentlyOpenCardId}"]`);
+                            if (prevCard) {
+                                const prevDetail = prevCard.querySelector('.card-detail');
+                                const prevArrow = prevCard.querySelector('.arrow-icon');
+                                if (prevDetail) prevDetail.classList.remove('open');
+                                if (prevArrow) prevArrow.classList.remove('expanded');
+                            }
+                        }
+                        detail.classList.add('open');
+                        arrowSpan.classList.add('expanded');
+                        currentlyOpenCardId = pcb.id;
+                        initChartForCard(pcb.id, pcb.scalingStations);
+                    }
+                });
+            }
+            const chk = header.querySelector('.complete-checkbox');
+            chk.addEventListener('change', (e) => { e.stopPropagation(); toggleComplete(pcb.id, chk.checked); });
+            const delBtn = header.querySelector('.delete-btn');
+            delBtn.addEventListener('click', (e) => { e.stopPropagation(); if(confirm(`确定删除料号 ${pcb.pn} 吗？`)) deletePcbById(pcb.id); });
+            detail.querySelector('.edit-scale-btn')?.addEventListener('click', (e) => { e.stopPropagation(); openScaleEditor(pcb.id); });
+            detail.querySelector('.edit-params-btn')?.addEventListener('click', (e) => { e.stopPropagation(); openPcbEditModal(pcb.id); });
+        });
+        if (currentlyOpenCardId) {
+            const openCard = document.querySelector(`.pcb-card[data-id="${currentlyOpenCardId}"]`);
+            if (openCard && openCard.querySelector('.card-detail')) {
+                openCard.querySelector('.card-detail').classList.add('open');
+                openCard.querySelector('.arrow-icon')?.classList.add('expanded');
+                const pcb = pcbList.find(p => p.id === currentlyOpenCardId);
+                if (pcb) initChartForCard(currentlyOpenCardId, pcb.scalingStations);
+            } else { currentlyOpenCardId = null; }
+        }
+    }
+
+    function initChartForCard(pcbId, scalingData) {
+        const canvas = document.getElementById(`chart-${pcbId}`);
+        if(!canvas) return;
+        if(chartInstances.has(pcbId)) chartInstances.get(pcbId).destroy();
+        const ctx = canvas.getContext('2d');
+        const newChart = new Chart(ctx, {
+            type: 'line', data: { labels: scalingData.map(s=>s.station), datasets: [
+                { label: 'X 缩放比', data: scalingData.map(s=>s.xRatio), borderColor: '#f97316', borderWidth: 2, pointRadius: 2, tension: 0.2, fill: false },
+                { label: 'Y 缩放比', data: scalingData.map(s=>s.yRatio), borderColor: '#3b82f6', borderWidth: 2, pointRadius: 2, tension: 0.2, fill: false }
+            ] }, options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top', labels: { boxWidth:10, font:{size:9} } }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(6)}` } } }, scales: { y: { ticks: { font: { size: 8 } } } } }
+        });
+        chartInstances.set(pcbId, newChart);
+    }
+
+    function renderTimelineView() {
+        const container = document.getElementById('timelineContainer');
+        const cardsDiv = document.getElementById('cardsContainer');
+        cardsDiv.style.display = 'none';
+        container.style.display = 'block';
+        container.innerHTML = '<div class="timeline-line"></div>';
+        let filtered = getFilteredList();
+        filtered.sort((a,b) => new Date(b.startDate) - new Date(a.startDate));
+        filtered.forEach(pcb => {
+            const item = document.createElement('div'); item.className = 'timeline-item';
+            const dot = document.createElement('div'); dot.className = 'timeline-dot';
+            const bubble = document.createElement('div'); bubble.className = 'timeline-bubble';
+            bubble.innerHTML = `<div><span class="timeline-pn">${escapeHtml(pcb.pn)}</span><div class="timeline-date">📅 ${pcb.startDate||'—'}</div></div><div class="timeline-terminal">${escapeHtml(pcb.appTerminal||'—')}</div>`;
+            bubble.addEventListener('click', () => openPcbEditModal(pcb.id));
+            item.appendChild(dot); item.appendChild(bubble); container.appendChild(item);
+        });
+        if(filtered.length===0) container.innerHTML += '<div style="text-align:center; padding:1rem;">暂无料号</div>';
+    }
+
+    function toggleComplete(pcbId, isChecked) {
+        const pcb = pcbList.find(p => p.id === pcbId);
+        if(!pcb) return;
+        if(isChecked && !pcb.isCompleted) { pcb.isCompleted = true; pcb.completeDate = todayStr(); }
+        else if(!isChecked && pcb.isCompleted) { pcb.isCompleted = false; pcb.completeDate = null; }
+        else return;
+        sortByCompletion(); saveToLocal(); render();
+    }
+    function deletePcbById(id) { pcbList = pcbList.filter(p => p.id !== id); if (currentlyOpenCardId === id) currentlyOpenCardId = null; saveToLocal(); render(); }
+    function render() { if(currentView === 'card') renderCardView(); else renderTimelineView(); }
+
+    // 新增料号
+    function addNewPcb() {
+        const newId = genId();
+        const prefixes = ['Q','T','W','H'];
+        const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+        const num1 = Math.floor(Math.random() * 100).toString().padStart(2,'0');
+        const num2 = Math.floor(Math.random() * 1000).toString().padStart(3,'0');
+        let defaultPn = `${prefix}${num1}M${num2}A`;
+        while(pcbList.some(p => p.pn === defaultPn)) {
+            defaultPn = `${prefix}${Math.floor(Math.random()*100).toString().padStart(2,'0')}M${Math.floor(Math.random()*1000).toString().padStart(3,'0')}A`;
+        }
+        const newPcb = {
+            id: newId, pn: defaultPn, isCompleted: false, startDate: todayStr(), completeDate: null, dueDate: new Date(Date.now() + 14*86400000).toISOString().slice(0,10),
+            structure: "", material: "", category: "", appTerminal: "新终端", copperThick: "35", inkInfo: "绿色油墨", pofv: "无", surfaceFinish: "ENIG",
+            coreParam: "", boardThickness: "", lineSpace: "", drcParam: "", prevVersion: "",
+            holes: { blind:[], buried:[], through:[], backdrill:[] },
+            scalingStations: JSON.parse(JSON.stringify(DEFAULT_STATIONS)), customFields: []
+        };
+        pcbList.unshift(newPcb);
+        sortByCompletion();
+        saveToLocal();
+        render();
+        openPcbEditModal(newId);
+    }
+
+    // 编辑料号 (工艺参数)
+    let currentEditPcbId = null;
+    function openPcbEditModal(id) {
+        currentEditPcbId = id;
+        const pcb = pcbList.find(p => p.id === id);
+        if(!pcb) return;
+        document.getElementById('modalTitle').innerText = `✏️ 编辑 ${pcb.pn}`;
+        document.getElementById('pn').value = pcb.pn;
+        document.getElementById('structure').value = pcb.structure||'';
+        document.getElementById('material').value = pcb.material||'';
+        document.getElementById('category').value = pcb.category||'';
+        document.getElementById('appTerminal').value = pcb.appTerminal||'';
+        document.getElementById('startDate').value = pcb.startDate||todayStr();
+        document.getElementById('coreParam').value = pcb.coreParam||'';
+        document.getElementById('boardThickness').value = pcb.boardThickness ? formatNumber(umToMil(parseFloat(pcb.boardThickness)), 2) : '';
+        document.getElementById('lineSpace').value = pcb.lineSpace||'';
+        document.getElementById('drcParam').value = pcb.drcParam||'';
+        document.getElementById('copperThick').value = pcb.copperThick ? formatNumber(umToMil(parseFloat(pcb.copperThick)), 2) : '';
+        document.getElementById('inkInfo').value = pcb.inkInfo||'';
+        document.getElementById('pofv').value = pcb.pofv||'无';
+        document.getElementById('surfaceFinish').value = pcb.surfaceFinish||'';
+        document.getElementById('dueDate').value = pcb.dueDate||todayStr();
+        document.getElementById('prevVersion').value = pcb.prevVersion||'';
+        renderHoleEditor(pcb.holes);
+        renderCustomFields(pcb.customFields||[]);
+        document.getElementById('pcbModal').classList.add('active');
+    }
+
+    function renderHoleEditor(holes) {
+        const container = document.getElementById('holeEditorContainer');
+        if(!container) return;
+        const types = ['blind','buried','through','backdrill'];
+        const names = ['盲孔 (Blind)','埋孔 (Buried)','通孔 (Through)','背钻孔 (Backdrill)'];
+        let html = '';
+        types.forEach((type, idx) => {
+            const list = holes[type] || [];
+            html += `<div class="hole-group"><h4 style="font-size:0.8rem; margin-bottom:0.3rem;">${names[idx]} <i class="fa-solid fa-plus-circle btn-icon" data-type="${type}" data-add-hole></i></h4>`;
+            list.forEach((item, i) => {
+                const milVal = formatNumber(umToMil(item.diameter), 2);
+                html += `<div class="hole-row" data-type="${type}" data-index="${i}">
+                            <input type="number" step="0.1" placeholder="孔径(mil)" value="${milVal}" class="hole-diam" style="width:100px;">
+                            <input type="number" placeholder="数量" value="${item.count}" class="hole-count" style="width:80px;">
+                            <i class="fa-regular fa-trash-can btn-icon" data-type="${type}" data-remove-hole="${i}"></i>
+                         </div>`;
+            });
+            html += `</div>`;
+        });
+        container.innerHTML = html;
+        container.querySelectorAll('[data-add-hole]').forEach(btn => btn.addEventListener('click', (e) => { const type = btn.getAttribute('data-type'); const cur = collectHolesFromDom(); cur[type].push({ diameter: 100, count: 1 }); renderHoleEditor(cur); }));
+        container.querySelectorAll('[data-remove-hole]').forEach(btn => btn.addEventListener('click', (e) => { const type = btn.getAttribute('data-type'); const idx = parseInt(btn.getAttribute('data-remove-hole'), 10); const cur = collectHolesFromDom(); if(!isNaN(idx) && cur[type]) cur[type].splice(idx, 1); renderHoleEditor(cur); }));
+    }
+    function collectHolesFromDom() {
+        const container = document.getElementById('holeEditorContainer');
+        const result = { blind:[], buried:[], through:[], backdrill:[] };
+        if(!container) return result;
+        const groups = container.querySelectorAll('.hole-group');
+        groups.forEach(group => {
+            let type = '';
+            const header = group.querySelector('h4');
+            if(header.innerText.includes('盲孔')) type = 'blind';
+            else if(header.innerText.includes('埋孔')) type = 'buried';
+            else if(header.innerText.includes('通孔')) type = 'through';
+            else if(header.innerText.includes('背钻孔')) type = 'backdrill';
+            if(type) {
+                const rows = group.querySelectorAll('.hole-row');
+                rows.forEach(row => {
+                    const diamMil = parseFloat(row.querySelector('.hole-diam')?.value) || 0;
+                    const cnt = parseInt(row.querySelector('.hole-count')?.value, 10) || 0;
+                    const diamUm = milToUm(diamMil);
+                    if(diamUm>0 || cnt>0) result[type].push({ diameter: diamUm, count: cnt });
+                });
+            }
+        });
+        return result;
+    }
+    function renderCustomFields(fields) {
+        const container = document.getElementById('customEditorContainer');
+        if(!container) return;
+        container.innerHTML = '';
+        fields.forEach((f, idx) => {
+            const row = document.createElement('div');
+            row.className = 'custom-param-row';
+            row.innerHTML = `<input placeholder="参数名" value="${escapeHtml(f.key)}" class="custom-key" style="flex:1;"><input placeholder="值" value="${escapeHtml(f.value)}" class="custom-value" style="flex:1;"><i class="fa-regular fa-trash-can btn-icon" data-custom-idx="${idx}"></i>`;
+            container.appendChild(row);
+        });
+        container.querySelectorAll('[data-custom-idx]').forEach(btn => btn.addEventListener('click', (e) => { const idx = parseInt(btn.getAttribute('data-custom-idx'), 10); const cur = collectCustomFieldsFromDom(); cur.splice(idx, 1); renderCustomFields(cur); }));
+    }
+    function collectCustomFieldsFromDom() {
+        const container = document.getElementById('customEditorContainer');
+        const result = [];
+        if(!container) return result;
+        const rows = container.querySelectorAll('.custom-param-row');
+        rows.forEach(row => {
+            const key = row.querySelector('.custom-key')?.value.trim();
+            const val = row.querySelector('.custom-value')?.value.trim();
+            if(key) result.push({ key, value: val || '' });
+        });
+        return result;
+    }
+    function savePcbFromModal() {
+        const pn = document.getElementById('pn').value.trim();
+        if(!pn) { alert("料号不能为空"); return; }
+        const holes = collectHolesFromDom();
+        const customFields = collectCustomFieldsFromDom();
+        const pcb = pcbList.find(p => p.id === currentEditPcbId);
+        if(pcb) {
+            pcb.pn = pn;
+            pcb.structure = document.getElementById('structure').value;
+            pcb.material = document.getElementById('material').value;
+            pcb.category = document.getElementById('category').value;
+            pcb.appTerminal = document.getElementById('appTerminal').value;
+            pcb.startDate = document.getElementById('startDate').value;
+            pcb.coreParam = document.getElementById('coreParam').value;
+            const boardThicknessMil = parseFloat(document.getElementById('boardThickness').value);
+            pcb.boardThickness = isNaN(boardThicknessMil) ? "" : milToUm(boardThicknessMil);
+            pcb.lineSpace = document.getElementById('lineSpace').value;
+            pcb.drcParam = document.getElementById('drcParam').value;
+            const copperThickMil = parseFloat(document.getElementById('copperThick').value);
+            pcb.copperThick = isNaN(copperThickMil) ? "" : milToUm(copperThickMil);
+            pcb.inkInfo = document.getElementById('inkInfo').value;
+            pcb.pofv = document.getElementById('pofv').value;
+            pcb.surfaceFinish = document.getElementById('surfaceFinish').value;
+            pcb.dueDate = document.getElementById('dueDate').value;
+            pcb.prevVersion = document.getElementById('prevVersion').value;
+            pcb.holes = holes;
+            pcb.customFields = customFields;
+            saveToLocal();
+            render();
+            closePcbModal();
+        }
+    }
+    function closePcbModal() { document.getElementById('pcbModal').classList.remove('active'); currentEditPcbId = null; }
+
+    // 缩放比编辑
+    let currentScalePcbId = null;
+    function openScaleEditor(id) {
+        currentScalePcbId = id;
+        const pcb = pcbList.find(p => p.id === id);
+        if(!pcb) return;
+        document.getElementById('scaleModalPid').innerHTML = `[${pcb.pn}]`;
+        const container = document.getElementById('stationEditorList');
+        container.innerHTML = '';
+        pcb.scalingStations.forEach((st, idx) => {
+            const div = document.createElement('div');
+            div.className = 'station-item-editor';
+            div.style.cssText = 'background:#f9f9ff; border-radius:1rem; padding:0.5rem; margin-bottom:0.6rem; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;';
+            div.innerHTML = `<input placeholder="站别" value="${escapeHtml(st.station)}" class="edit-station-name" style="flex:1; min-width:100px; padding:0.3rem; border-radius:1rem; border:1px solid #ddd;">
+                            <span style="font-size:0.7rem; font-weight:600;">X:</span><input type="number" step="0.000001" value="${st.xRatio}" class="edit-station-x" style="width:90px; padding:0.3rem;">
+                            <span style="font-size:0.7rem; font-weight:600;">Y:</span><input type="number" step="0.000001" value="${st.yRatio}" class="edit-station-y" style="width:90px; padding:0.3rem;">
+                            <i class="fa-regular fa-trash-can" style="cursor:pointer; color:#e53e3e;" data-scale-idx="${idx}"></i>`;
+            container.appendChild(div);
+        });
+        container.querySelectorAll('[data-scale-idx]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.getAttribute('data-scale-idx'), 10);
+                if(!isNaN(idx)) {
+                    pcb.scalingStations.splice(idx, 1);
+                    openScaleEditor(id);
+                }
+            });
+        });
+        document.getElementById('scaleModal').classList.add('active');
+    }
+    function saveScaleEditor() {
+        const pcb = pcbList.find(p => p.id === currentScalePcbId);
+        if(!pcb) return;
+        const newList = [];
+        const rows = document.querySelectorAll('#stationEditorList .station-item-editor');
+        rows.forEach(row => {
+            const station = row.querySelector('.edit-station-name')?.value.trim();
+            if(!station) return;
+            const x = parseFloat(row.querySelector('.edit-station-x')?.value);
+            const y = parseFloat(row.querySelector('.edit-station-y')?.value);
+            if(!isNaN(x) && !isNaN(y)) {
+                newList.push({ station, xRatio: parseFloat(x.toFixed(6)), yRatio: parseFloat(y.toFixed(6)) });
+            }
+        });
+        if(newList.length) pcb.scalingStations = newList;
+        else pcb.scalingStations = [{ station:"默认", xRatio:1.0, yRatio:1.0 }];
+        saveToLocal();
+        document.getElementById('scaleModal').classList.remove('active');
+        render();
+        if(currentlyOpenCardId === pcb.id) setTimeout(() => initChartForCard(pcb.id, pcb.scalingStations), 50);
+    }
+    function addStationInModal() {
+        const pcb = pcbList.find(p => p.id === currentScalePcbId);
+        if(pcb) { pcb.scalingStations.push({ station:"新站别", xRatio:1.000000, yRatio:1.000000 }); openScaleEditor(currentScalePcbId); }
+    }
+
+    // 备份/恢复/导出
+    function backupJSON() { const data=JSON.stringify(pcbList,null,2); const blob=new Blob([data],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`pcb_backup_${todayStr()}.json`; a.click(); }
+    function restoreFromFile(file){ const reader=new FileReader(); reader.onload=(e)=>{ try{ const imported=JSON.parse(e.target.result); if(Array.isArray(imported)){ pcbList=imported; pcbList.forEach(p=>{ if(!p.scalingStations) p.scalingStations=[...DEFAULT_STATIONS]; if(!p.startDate) p.startDate=todayStr(); if(!p.customFields) p.customFields=[]; if(!p.holes) p.holes={ blind:[], buried:[], through:[], backdrill:[] }; if(p.boardThickness===undefined) p.boardThickness=""; if(p.copperThick===undefined) p.copperThick=""; }); sortByCompletion(); saveToLocal(); render(); alert("恢复成功"); } else alert("无效数据"); } catch(ex){ alert("恢复失败"); } }; reader.readAsText(file); }
+    function exportTableView(){ let csv=[["料号","投料日","完结日","是否完结","交期","终端","结构","CORE","板厚(μm)","Line/Space","DRC","面铜(μm)","油墨","POFV","表面处理","前版"]]; pcbList.forEach(p=>{ csv.push([p.pn, p.startDate||'', p.completeDate||'', p.isCompleted?"是":"否", p.dueDate||'', p.appTerminal||'', p.structure||'', p.coreParam||'', p.boardThickness||'', p.lineSpace||'', p.drcParam||'', p.copperThick||'', p.inkInfo||'', p.pofv||'', p.surfaceFinish||'', p.prevVersion||'']); }); const blob=new Blob(["\uFEFF"+csv.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n")],{type:"text/csv"}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`pcb_table_${todayStr()}.csv`; a.click(); }
+
+    // 设置菜单绑定
+    const settingsMenu = document.getElementById('settingsMenu');
+    document.getElementById('settingsGear').onclick = () => settingsMenu.classList.add('active');
+    document.getElementById('closeSettingsBtn').onclick = () => settingsMenu.classList.remove('active');
+    settingsMenu.addEventListener('click', (e) => { if(e.target === settingsMenu) settingsMenu.classList.remove('active'); });
+    const viewOpts = document.querySelectorAll('#viewToggle .view-opt');
+    const hideSwitch = document.getElementById('hideCompletedSwitch');
+    function updateViewUI() { viewOpts.forEach(opt => { if(opt.dataset.view === currentView) opt.classList.add('active'); else opt.classList.remove('active'); }); hideSwitch.checked = hideCompleted; }
+    viewOpts.forEach(opt => opt.addEventListener('click', () => { currentView = opt.dataset.view; updateViewUI(); render(); settingsMenu.classList.remove('active'); }));
+    hideSwitch.addEventListener('change', (e) => { hideCompleted = e.target.checked; render(); });
+    document.getElementById('backupBtn').addEventListener('click', () => { backupJSON(); settingsMenu.classList.remove('active'); });
+    document.getElementById('restoreBtn').addEventListener('click', () => { document.getElementById('restoreFileInput').click(); settingsMenu.classList.remove('active'); });
+    document.getElementById('exportTableBtn').addEventListener('click', () => { exportTableView(); settingsMenu.classList.remove('active'); });
+    document.getElementById('restoreFileInput').addEventListener('change', e => { if(e.target.files[0]) restoreFromFile(e.target.files[0]); e.target.value=''; });
+    document.getElementById('addQuickBtn').addEventListener('click', addNewPcb);
+    document.getElementById('closeModalBtn').addEventListener('click', closePcbModal);
+    document.getElementById('savePcbBtn').addEventListener('click', savePcbFromModal);
+    document.getElementById('closeScaleModalBtn').addEventListener('click', () => document.getElementById('scaleModal').classList.remove('active'));
+    document.getElementById('saveScaleBtn').addEventListener('click', saveScaleEditor);
+    document.getElementById('addStationScaleBtn').addEventListener('click', addStationInModal);
+    document.getElementById('addCustomFieldBtn').addEventListener('click', () => { const cur = collectCustomFieldsFromDom(); cur.push({ key:"新参数", value:"" }); renderCustomFields(cur); });
+    window.onload = () => { loadFromLocal(); render(); updateViewUI(); };
+</script>
+</body>
+</html>
