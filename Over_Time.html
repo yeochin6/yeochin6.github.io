@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
     <title>加班记录 · 打工人专用</title>
-    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
@@ -28,6 +27,8 @@
             --nav-btn-bg: #ffffff;
             --nav-btn-border: #d4dcfa;
             --nav-btn-active: #e9efff;
+            --card-radius: 18px;
+            --icon-radius: 13px;
         }
         body {
             min-height: 100vh;
@@ -36,8 +37,9 @@
             font-family: var(--font);
             color: #24284f;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
-        /* 顶部一体胶囊 */
         .top-capsule {
             background: var(--header-gradient);
             border-radius: var(--radius);
@@ -52,8 +54,8 @@
             border: 1px solid rgba(255,255,255,0.25);
         }
         .inner-small {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
             border-radius: 40px;
             padding: 8px 16px;
             margin: 6px 0 6px 8px;
@@ -65,14 +67,24 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.35);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 4;
+            flex-shrink: 0;
         }
         .inner-small i { font-size: 0.9em; }
         .marquee-container {
             flex: 1;
             overflow: hidden;
-            padding: 12px 8px;
+            padding: 10px 8px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.25) 10px, black 22px, black 100%);
+            mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.25) 10px, black 22px, black 100%);
+            min-height: 0;
         }
         .marquee-container marquee {
             font-size: var(--headline);
@@ -80,102 +92,34 @@
             letter-spacing: .10em;
             color: #fff;
             text-shadow: 0 2px 6px rgba(0,0,0,0.25), 0 0 20px rgba(255,255,255,0.15);
-            display: flex;
-            align-items: center;
             white-space: nowrap;
+            line-height: 1;
+            display: block;
         }
         main {
             max-width: 525px;
             margin: auto;
             padding: 6px 8px 18px 8px;
-        }
-        .progress-area {
-            margin-bottom: 16px;
-            position: relative;
-        }
-        .period-label {
-            color: #4d60ad;
-            font-weight: 500;
-            text-align: center;
-            margin: 2px 0 6px 0;
-            font-size: .97em;
-        }
-        .period-nav {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin: 8px 0 10px 0;
-        }
-        .period-nav button {
-            background: var(--nav-btn-bg);
-            border: 1.5px solid var(--nav-btn-border);
-            color: var(--primary);
-            border-radius: 22px;
-            padding: 6px 14px;
-            font-size: 0.9em;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-            letter-spacing: .3px;
-        }
-        .period-nav button:hover {
-            background: var(--nav-btn-active);
-            box-shadow: 0 4px 10px rgba(88,102,239,0.15);
-        }
-        .period-nav button:active { transform: scale(0.97); }
-        .progress-bg {
-            position: relative;
             width: 100%;
-            height: 14px;
-            background: var(--progress-bg);
-            border-radius: 8px;
-            overflow: visible;
-            margin-bottom: 3px;
+            flex: 1;
         }
-        .progress-inner {
-            height: 100%;
-            background: var(--header-gradient);
-            width: 0%;
-            transition: width 0.8s cubic-bezier(0.7, 0, 0.3, 1);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px #7275bd2a;
-            position: relative;
+        .progress-area { margin-bottom: 16px; position: relative; }
+        .period-label { color: #4d60ad; font-weight: 500; text-align: center; margin: 2px 0 6px 0; font-size: .97em; }
+        .period-nav { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 8px 0 10px 0; }
+        .period-nav button {
+            background: var(--nav-btn-bg); border: 1.5px solid var(--nav-btn-border); color: var(--primary);
+            border-radius: 22px; padding: 6px 14px; font-size: 0.9em; font-weight: 500; cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.04); letter-spacing: .3px;
         }
-        .progress-icon {
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            color: #ffffff;
-            text-shadow: 0 0 6px rgba(86,104,221,0.8), 0 0 3px #00000055;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-            pointer-events: none;
-            z-index: 2;
-            transition: left 0.8s cubic-bezier(0.7, 0, 0.3, 1);
-        }
-        .calendar {
-            background: #fff;
-            border-radius: 18px;
-            padding: var(--block-padding) 4px 12px 4px;
-            box-shadow: var(--shadow);
-            margin-bottom: 18px;
-            overflow-x: auto;
-            touch-action: manipulation;
-        }
-        .calendar-header, .calendar-row {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            align-items: center;
-        }
-        .calendar-header span {
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 1em;
-            text-align: center;
-            padding: 2px 0;
-        }
+        .period-nav button:hover { background: var(--nav-btn-active); box-shadow: 0 4px 10px rgba(88,102,239,0.15); }
+        .period-nav button:active { transform: scale(0.97); }
+        .progress-bg { position: relative; width: 100%; height: 14px; background: var(--progress-bg); border-radius: 8px; overflow: visible; margin-bottom: 3px; }
+        .progress-inner { height: 100%; background: var(--header-gradient); width: 0%; transition: width 0.8s cubic-bezier(0.7, 0, 0.3, 1); border-radius: 8px; box-shadow: 0 2px 8px #7275bd2a; position: relative; }
+        .progress-icon { position: absolute; top: 50%; transform: translate(-50%, -50%); font-size: 20px; color: #ffffff; text-shadow: 0 0 6px rgba(86,104,221,0.8), 0 0 3px #00000055; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); pointer-events: none; z-index: 2; transition: left 0.8s cubic-bezier(0.7, 0, 0.3, 1); }
+        .calendar { background: #fff; border-radius: var(--card-radius); padding: var(--block-padding) 4px 12px 4px; box-shadow: var(--shadow); margin-bottom: 18px; overflow-x: auto; touch-action: manipulation; }
+        .calendar-header, .calendar-row { display: grid; grid-template-columns: repeat(7, 1fr); align-items: center; }
+        .calendar-header span { color: var(--primary); font-weight: 600; font-size: 1em; text-align: center; padding: 2px 0; }
+        /* 基础单元格：增加下凹内阴影 */
         .calendar-cell {
             min-width: 38px;
             height: 48px;
@@ -194,923 +138,443 @@
             border: 2.2px solid transparent;
             overflow: hidden;
             user-select: none;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06), inset 0 -1px 2px rgba(255,255,255,0.9);
         }
-        .calendar-cell.today { border: 2.2px solid var(--primary); }
-        .calendar-cell[data-weekend="1"]:not([data-pubholiday="1"]) { background: var(--cell-holiday); }
+        .calendar-cell.today {
+            border: 2.2px solid var(--primary);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06), inset 0 -1px 2px rgba(255,255,255,0.9);
+        }
+        .calendar-cell[data-weekend="1"]:not([data-pubholiday="1"]) {
+            background: var(--cell-holiday);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06), inset 0 -1px 2px rgba(255,255,255,0.9);
+        }
+        /* 国假单元格：叠加标记阴影 */
         .calendar-cell[data-pubholiday="1"] {
             background: var(--cell-pubholiday);
             border-color: #f5cfa0;
-            box-shadow: inset 0 0 0 1px #fad8b5;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06), inset 0 -1px 2px rgba(255,255,255,0.9), inset 0 0 0 1px #fad8b5;
         }
-        .calendar-cell.custom-holiday:not([data-pubholiday="1"]):not([data-weekend="1"]) {
-            background: var(--cell-holiday);
-            border-color: #d5c4e0;
+        .calendar-cell.user-override-workday {
+            background: #eef3fb;
+            border-left: 3px solid #5866ef;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06), inset 0 -1px 2px rgba(255,255,255,0.9);
         }
-        .cell-date {
-            font-weight: 500;
-            font-size: 1.05em;
-            position: relative;
+        .calendar-cell.user-override-holiday {
+            background: #f8f2ff;
+            border-left: 3px solid #9a49fa;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06), inset 0 -1px 2px rgba(255,255,255,0.9);
         }
-        .cell-ot-bar-bg {
-            margin-top: 0.5em;
-            width: 82%;
-            height: 7px;
-            background: #e5e5ee;
-            border-radius: 7px;
-            overflow: hidden;
+        .calendar-cell.user-override-publicholiday {
+            background: #fff3e0;
+            border-left: 3px solid #f0803c;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06), inset 0 -1px 2px rgba(255,255,255,0.9);
         }
-        .cell-ot-bar {
-            height: 100%;
-            transition: width .25s;
-            background: var(--overtime-bar);
-            box-shadow: 0 1px 4px #5668dd35;
-            min-width: 1.5px;
-        }
+        .cell-date { font-weight: 500; font-size: 1.05em; position: relative; }
+        .cell-ot-bar-bg { margin-top: 0.5em; width: 82%; height: 7px; background: #e5e5ee; border-radius: 7px; overflow: hidden; }
+        .cell-ot-bar { height: 100%; transition: width .25s; background: var(--overtime-bar); box-shadow: 0 1px 4px #5668dd35; min-width: 1.5px; }
         .cell-ot-bar.warn { background: var(--warning); }
         .cell-ot-bar.full { background: var(--danger); }
-        .cell-ot-num {
-            margin: .18em 0 0 0;
-            font-size: .97em;
-            color: var(--primary);
-            font-weight: bold;
-        }
-        .cell-blank { background: none; pointer-events: none; }
-
-        /* 三列统计卡片 */
-        .stats-columns {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            text-align: center;
-            margin-bottom: 16px;
-            padding: 0 4px;
-        }
+        .cell-ot-num { margin: .18em 0 0 0; font-size: 1.05em; color: #24284f; font-weight: 800; }
+        .cell-blank { background: none; pointer-events: none; box-shadow: none; }
+        .stats-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; margin-bottom: 16px; padding: 0 4px; }
         .stat-card {
-            background: #f8faff;
-            border-radius: 20px;
-            padding: 10px 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            transition: transform 0.1s;
-        }
-        .stat-card i {
-            font-size: 1.6em;
-            display: block;
-            margin-bottom: 6px;
-        }
-        .stat-card .stat-label {
-            font-size: 0.85em;
-            font-weight: 500;
-            color: #6c7bbd;
-            margin-bottom: 4px;
-        }
-        .stat-card .stat-hours {
-            font-size: 1.6em;
-            font-weight: bold;
-            color: var(--primary);
-            line-height: 1.2;
-        }
-        .stat-card .stat-multiplier {
-            font-size: 0.75em;
-            color: #a0a9cf;
-        }
-        .total-row-salary {
-            border-top: 1.5px dashed #dde3f8;
-            padding-top: 12px;
-            margin-top: 4px;
-            font-size: 1.2em;
-            text-align: center;
-        }
-        .summary {
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-            padding: var(--block-padding) 10px 10px 10px;
-            margin-bottom: 12px;
-        }
-        .modal-mask {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: #727e9433;
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal {
-            background: #fff;
+            background: #f0f2f7;
             border-radius: 16px;
-            box-shadow: var(--shadow);
-            padding: 22px 24px;
-            min-width: 222px;
-            max-width: 93vw;
+            padding: 12px 6px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.06), inset 0 -1px 2px rgba(255,255,255,0.8);
+            transition: box-shadow 0.25s;
+        }
+        .stat-card:hover {
+            box-shadow: inset 0 3px 8px rgba(0,0,0,0.1), inset 0 -1px 2px rgba(255,255,255,0.7);
+        }
+        .stat-card i { font-size: 1.6em; display: block; margin-bottom: 6px; }
+        .stat-card .stat-label { font-size: 0.85em; font-weight: 600; color: #6c7bbd; margin-bottom: 4px; }
+        .stat-card .stat-hours { font-size: 1.7em; font-weight: 800; color: var(--primary); line-height: 1.2; font-variant-numeric: tabular-nums; }
+        .stat-card .stat-multiplier { font-size: 0.75em; color: #a0a9cf; }
+        .total-row-salary { border-top: 1.5px dashed #dde3f8; padding-top: 12px; margin-top: 4px; font-size: 1.2em; text-align: center; }
+        .summary { background: #fff; border-radius: var(--card-radius); box-shadow: var(--shadow); padding: var(--block-padding) 10px 10px 10px; margin-bottom: 12px; }
+        .chart-card { background: #fff; border-radius: var(--card-radius); box-shadow: var(--shadow); padding: 16px 12px 18px 12px; margin-bottom: 20px; }
+        .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 0 4px; }
+        .chart-header .chart-title { font-weight: 600; color: var(--primary); font-size: 0.95rem; letter-spacing: 0.3px; }
+        .ios-switch { display: flex; background: #eef3fc; border-radius: 32px; padding: 3px; gap: 2px; }
+        .switch-option { font-size: 0.75rem; font-weight: 500; padding: 6px 14px; border-radius: 30px; background: transparent; color: #5668dd; border: none; cursor: pointer; transition: all 0.2s ease; letter-spacing: 0.3px; }
+        .switch-option.active { background: #ffffff; color: #2f3bb3; box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-weight: 600; }
+        canvas#trendChart { display: block; margin: 0 auto; width: 100%; background: #fefefe; border-radius: 16px; }
+        .chart-note { font-size: 0.7rem; text-align: center; color: #9aa9ce; margin-top: 12px; background: #f5f9fe; display: inline-block; width: auto; margin-left: auto; margin-right: auto; padding: 4px 12px; border-radius: 20px; }
+        .modal-mask { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .ios-alert { background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%); border-radius: 32px; width: 290px; max-width: 85vw; padding: 28px 22px 24px; box-shadow: 0 25px 45px rgba(86,104,221,0.3), 0 4px 12px rgba(0,0,0,0.1); text-align: center; animation: fadeInScale 0.2s ease; border: 1px solid rgba(88,102,239,0.2); }
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .ios-alert h2 { font-size: 1.8rem; font-weight: 700; margin: 0 0 12px 0; background: var(--header-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.3px; }
+        .ios-alert .feature-list { text-align: left; margin: 20px 0 24px; padding-left: 6px; }
+        .ios-alert .feature-list p { margin: 12px 0; font-size: 0.95rem; color: #2c2e5a; display: flex; align-items: center; gap: 12px; }
+        .ios-alert .feature-list i { width: 24px; color: var(--primary); font-size: 1.1rem; text-align: center; }
+        .ios-alert .confirm-btn { background: var(--header-gradient); border: none; padding: 12px 0; width: 100%; border-radius: 44px; font-size: 1rem; font-weight: 600; color: white; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(86,104,221,0.4); }
+        .ios-alert .confirm-btn:active { transform: scale(0.97); opacity: 0.9; }
+        .modal { background: #fff; border-radius: 28px; box-shadow: var(--shadow); padding: 24px 22px 22px; min-width: 260px; max-width: 90vw; display: flex; flex-direction: column; align-items: stretch; font-size: 1.05em; animation: fadein .22s; }
+        @keyframes fadein { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+        .modal label { color: #8693e7; text-align: center; line-height: 1.5; margin-bottom: 12px; font-weight: 500; }
+        .modal .type-badge { display: inline-block; background: #f0f4fe; padding: 4px 12px; border-radius: 40px; font-size: 0.85rem; margin-top: 4px; }
+        .modal input[type='number'] { width: 100%; font-size: 1.2rem; padding: 10px 0; text-align: center; border: 2px solid #dce3fc; background: #f6f8fd; border-radius: 32px; color: var(--primary); font-weight: 600; margin-bottom: 16px; }
+        .fold-section { background: #f8faff; border-radius: 20px; margin: 8px 0 12px; overflow: hidden; }
+        .fold-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; cursor: pointer; color: var(--primary); font-weight: 500; font-size: 0.9rem; transition: background 0.15s; }
+        .fold-header:hover { background: #eef3ff; }
+        .fold-header i { transition: transform 0.2s; font-size: 0.9rem; }
+        .fold-content { max-height: 0; overflow: hidden; transition: max-height 0.25s ease-out; padding: 0 12px; }
+        .fold-content.open { max-height: 150px; padding: 8px 12px 16px; }
+        .type-buttons { display: flex; gap: 10px; justify-content: space-between; }
+        .type-btn { flex: 1; background: white; border: 1.5px solid #cdd9fc; border-radius: 40px; padding: 8px 0; font-size: 0.85rem; font-weight: 500; color: #3d4f9c; cursor: pointer; transition: all 0.15s; text-align: center; }
+        .type-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 8px rgba(88,102,239,0.3); }
+        .modal-btns { display: flex; gap: 12px; margin-top: 8px; }
+        .modal button { flex: 1; padding: 10px 0; border: none; border-radius: 44px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .modal .save-btn { background: var(--primary); color: #fff; }
+        .modal .cancel-btn { background: #eef2fc; color: #5866ef; }
+        .salary-card { background: #fff; border-radius: var(--card-radius); box-shadow: var(--shadow); padding: 8px 16px; margin-bottom: 12px; }
+        .input-group { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: nowrap; }
+        .wage-label-wrapper { display: flex; align-items: center; gap: 8px; background: #f0f4fe; padding: 6px 14px; border-radius: 40px; color: var(--primary); font-weight: 500; white-space: nowrap; }
+        .wage-label-wrapper .icon-box { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: rgba(88,102,239,0.1); border-radius: var(--icon-radius); flex-shrink: 0; font-size: 1rem; color: var(--primary); }
+        .wage-label-wrapper span { font-size: 0.85rem; }
+        .wage-input-wrapper { display: flex; align-items: center; gap: 4px; background: #f8faff; border-radius: 48px; padding: 2px 8px 2px 14px; border: 1px solid #e0e7fc; transition: all 0.2s; flex-shrink: 1; }
+        .wage-input-wrapper:focus-within { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(88,102,239,0.15); background: #ffffff; }
+        .wage-input-wrapper .currency { font-size: 1rem; font-weight: 600; color: var(--primary); }
+        #hourly-wage { width: 80px; padding: 7px 0; font-size: 0.95rem; font-weight: 600; text-align: center; border: none; background: transparent; color: #2c3e66; outline: none; }
+        #hourly-wage::-webkit-inner-spin-button, #hourly-wage::-webkit-outer-spin-button { opacity: 0.5; }
+        .input-group button { background: var(--header-gradient); border: none; padding: 7px 16px; border-radius: 44px; font-size: 0.8rem; font-weight: 600; color: white; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 2px 8px rgba(86,104,221,0.3); display: flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
+        .input-group button .btn-icon-box { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: rgba(255,255,255,0.22); border-radius: 9px; flex-shrink: 0; font-size: 0.9rem; }
+        .input-group button:active { transform: scale(0.96); box-shadow: 0 1px 4px rgba(86,104,221,0.4); }
+        .footer-motto {
+            text-align: center;
+            padding: 12px 16px 8px;
+            color: #5b6ab0;
+            font-size: 0.85rem;
+            letter-spacing: 0.6px;
+            border-top: 1px solid #eef2fc;
+            margin-top: 8px;
+            line-height: 1.7;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            font-size: 1.07em;
-            animation: fadein .22s;
+            gap: 6px;
         }
-        @keyframes fadein {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: none; }
-        }
-        .modal label {
-            margin-bottom: 7px;
-            color: #8693e7;
-            text-align: center;
-            line-height: 1.5;
-        }
-        .modal label .pub-badge {
-            display: inline-block;
-            background: #fff3e0;
-            color: var(--pubholiday-accent);
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: .88em;
-            margin-top: 3px;
-            border: 1px solid #f5cfa0;
-        }
-        .modal input[type='number'] {
-            width: 80px;
-            font-size: 1.05em;
-            margin-bottom: 13px;
-            padding: 4px 0 4px 7px;
-            border: 1.5px solid #b3d0f8;
-            background: #f6f8fd;
-            border-radius: 8px;
-            color: var(--primary);
-        }
-        .modal .modal-btns {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .modal button {
-            padding: .55em 1.7em;
-            border: none;
-            border-radius: 7px;
-            font-size: 1em;
+        .footer-motto .motto-text {
+            font-style: italic;
             font-weight: 500;
-            cursor: pointer;
-            background: var(--primary);
-            color: #fff;
-            transition: background .19s;
+            color: #3d4b8a;
         }
-        .modal button.cancel { background: #b8bde4; }
-        .modal .option-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-            margin: 10px 0;
-        }
-        .modal .option-buttons button {
-            background: #f0f4fe;
-            color: var(--primary);
-            border: 1px solid #b3d0f8;
-            box-shadow: none;
-            font-weight: normal;
-        }
-        .modal .option-buttons button:hover { background: #e0e8fc; }
-        .chart-container {
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-            padding: 14px 10px 12px 10px;
-            margin-bottom: 18px;
-            text-align: center;
-        }
-        .chart-title {
-            font-size: 1em;
-            color: var(--primary);
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-        canvas#weekly-chart {
-            display: block;
-            margin: 0 auto;
-            max-width: 100%;
-            width: 100%;
-            height: auto;
-            background: #fefefe;
-            border-radius: 12px;
-        }
-        .weekly-stats {
-            margin-top: 12px;
-            font-size: 0.94em;
+        .days-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             background: #f0f4fe;
             border-radius: 32px;
-            padding: 8px 12px;
-            color: #3b4570;
-        }
-        .input-group {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 8px;
-        }
-        .input-group label {
-            margin-right: 6px;
-            font-size: 1em;
-            color: var(--primary);
-        }
-        #hourly-wage {
-            padding: 7px 7px 7px 8px;
-            width: 82px;
-            font-size: 1.06em;
-            border: 1.5px solid #b3d0f8;
-            border-radius: 7px;
-            background: #f6f8fd;
-            margin-right: 6px;
-        }
-        .input-group button {
-            background: var(--accent);
-            color: #fff;
-            border-radius: 7px;
-            border: none;
-            padding: 7px 18px;
+            padding: 5px 14px;
+            font-size: 0.8rem;
             font-weight: 500;
-            cursor: pointer;
-            margin-left: 6px;
-            font-size: 1em;
-            transition: background 0.2s;
+            color: var(--primary);
+            white-space: nowrap;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            border: 1px solid #dce3fc;
         }
-        .input-group button:hover { background: var(--primary); }
-        .toast {
-            position: fixed;
-            top: 0; left: 50%;
-            transform: translateX(-50%);
-            background: #3b3f5c;
-            color: #ffd966;
-            padding: 8px 24px;
-            border-radius: 0 0 16px 16px;
-            font-size: 0.95em;
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.3s, top 0.3s;
-            pointer-events: none;
-            box-shadow: 0 4px 12px #00000022;
+        .days-badge i { font-size: 0.9rem; }
+        .footer-note {
+            font-size: 0.68rem;
+            color: #9aa3c0;
+            margin-top: 2px;
         }
-        .toast.show { opacity: 1; top: 10px; }
-        .secret-gear {
-            position: fixed;
-            bottom: 16px; right: 16px;
-            width: 36px; height: 36px;
-            background: #eeeff8;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: #5668dd;
-            cursor: pointer;
-            box-shadow: 0 2px 8px #a6b0e433;
-            z-index: 900;
-            transition: background 0.2s;
+        @media (max-width: 500px) {
+            .input-group { gap: 6px; }
+            .wage-label-wrapper { padding: 4px 10px; }
+            .wage-label-wrapper span { font-size: 0.75rem; }
+            .wage-label-wrapper .icon-box { width: 28px; height: 28px; font-size: 0.85rem; }
+            #hourly-wage { width: 70px; font-size: 0.85rem; }
+            .input-group button { padding: 6px 12px; font-size: 0.75rem; }
+            .input-group button .btn-icon-box { width: 22px; height: 22px; font-size: 0.75rem; border-radius: 7px; }
+            .footer-motto { font-size: 0.78rem; }
+            .days-badge { padding: 4px 12px; font-size: 0.72rem; }
         }
-        .secret-gear:hover { background: #dcdef8; }
-        .secret-menu {
-            position: fixed;
-            bottom: 60px; right: 16px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            display: none;
-            flex-direction: column;
-            padding: 6px 4px;
-            z-index: 901;
-            min-width: 120px;
-        }
-        .secret-menu button {
-            background: transparent;
-            border: none;
-            padding: 10px 16px;
-            text-align: left;
-            font-size: 0.95em;
-            color: #24284f;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-        }
-        .secret-menu button:hover { background: #eef3fb; }
+        .secret-gear { position: fixed; bottom: 16px; right: 16px; width: 40px; height: 40px; background: rgba(255,255,255,0.9); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 20px; color: #5668dd; cursor: pointer; box-shadow: 0 4px 12px rgba(86,104,221,0.3); z-index: 900; transition: all 0.2s; border: 1px solid rgba(88,102,239,0.3); }
+        .secret-gear:hover { background: #ffffff; transform: scale(1.05); }
+        .secret-menu { position: fixed; bottom: 68px; right: 16px; background: #fff; border-radius: 20px; box-shadow: var(--shadow); display: none; flex-direction: column; padding: 6px 4px; z-index: 901; min-width: 130px; backdrop-filter: blur(8px); background: rgba(255,255,255,0.96); border: 1px solid rgba(88,102,239,0.2); }
+        .secret-menu button { background: transparent; border: none; padding: 12px 18px; text-align: left; font-size: 0.9rem; color: #2c3e66; border-radius: 14px; cursor: pointer; width: 100%; transition: background 0.15s; }
+        .secret-menu button:hover { background: #eef3ff; }
         .secret-file-input { display: none; }
         .fa-icon-mr { margin-right: 4px; }
         .fa-icon-ml { margin-left: 4px; }
+        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #24284f; color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: opacity 0.35s; z-index: 2000; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+        .toast.show { opacity: 1; }
         @media (max-width:640px) {
             main { padding: 2px; }
-            .calendar, .summary, .chart-container { padding: 10px 2px; }
+            .calendar, .summary, .chart-card { padding: 10px 2px; }
             .calendar-cell { min-width: 17px; font-size: .94em; height: 44px; }
             .inner-small { padding: 4px 10px; font-size: 0.85em; }
             .marquee-container marquee { font-size: 1em; }
             .top-capsule { margin: 6px 10px 12px 10px; }
-            .modal { padding: 20px 6vw; }
+            .modal { padding: 20px 16px; }
             .period-nav { gap: 6px; }
             .period-nav button { padding: 5px 10px; font-size: 0.82em; }
-            canvas#weekly-chart { min-height: 200px; }
+            canvas#trendChart { min-height: 200px; }
             .progress-icon { font-size: 16px; }
             .stats-columns { gap: 6px; }
-            .stat-card .stat-hours { font-size: 1.3em; }
+            .stat-card .stat-hours { font-size: 1.4em; }
             .stat-card i { font-size: 1.3em; }
+            .switch-option { padding: 4px 10px; font-size: 0.7rem; }
+            .type-btn { font-size: 0.75rem; padding: 6px 0; }
         }
     </style>
 </head>
 <body>
-    <div class="top-capsule">
-        <div class="inner-small" id="small-capsule">
-            <i class="fas fa-hourglass-half"></i> <span id="total-hours-display">0h</span>
+<div class="top-capsule">
+    <div class="inner-small" id="small-capsule"><i class="fas fa-hourglass-half"></i> <span id="total-hours-display">0h</span></div>
+    <div class="marquee-container"><marquee id="header-slogan" direction="left" scrollamount="4" behavior="scroll"></marquee></div>
+</div>
+
+<main>
+    <div class="progress-area">
+        <div class="period-label" id="period-label"></div>
+        <div class="period-nav"><button id="prev-period-btn"><i class="fas fa-chevron-left fa-icon-mr"></i>前一周期</button><button id="today-period-btn"><i class="fas fa-location-dot fa-icon-mr"></i>今天</button><button id="next-period-btn">后一周期<i class="fas fa-chevron-right fa-icon-ml"></i></button></div>
+        <div class="progress-bg" id="progress-bg"><div class="progress-inner" id="progress-inner"></div><i id="progress-icon" class="fas fa-person-walking progress-icon"></i></div>
+    </div>
+    <section class="calendar" id="calendar"></section>
+    <section class="summary" id="summary"><div class="stats-columns" id="stats-columns"></div><div class="total-row-salary" id="total-salary"></div></section>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title"><i class="fas fa-chart-line fa-icon-mr"></i>加班趋势</div>
+            <div class="ios-switch" id="chartSwitch">
+                <button class="switch-option active" data-chart="0">本月时数</button>
+                <button class="switch-option" data-chart="1">本年时数</button>
+            </div>
         </div>
-        <div class="marquee-container">
-            <marquee id="header-slogan" direction="left" scrollamount="4" behavior="scroll"></marquee>
-        </div>
+        <canvas id="trendChart" width="500" height="260" style="width:100%; height:auto; aspect-ratio:500/260"></canvas>
+        <div class="chart-note" id="chartNote">📈 月度时数走势 · 截止今日累积</div>
     </div>
 
-    <main>
-        <div class="progress-area">
-            <div class="period-label" id="period-label"></div>
-            <div class="period-nav">
-                <button id="prev-period-btn"><i class="fas fa-chevron-left fa-icon-mr"></i>前一周期</button>
-                <button id="today-period-btn"><i class="fas fa-location-dot fa-icon-mr"></i>今天</button>
-                <button id="next-period-btn">后一周期<i class="fas fa-chevron-right fa-icon-ml"></i></button>
+    <div class="salary-card">
+        <form id="wage-form" autocomplete="off">
+            <div class="input-group">
+                <div class="wage-label-wrapper">
+                    <span class="icon-box"><i class="fas fa-coins"></i></span>
+                    <span>本周期时薪</span>
+                </div>
+                <div class="wage-input-wrapper">
+                    <span class="currency">¥</span>
+                    <input type="number" min="0" step="0.01" id="hourly-wage" placeholder="30.00">
+                </div>
+                <button type="submit"><span class="btn-icon-box"><i class="fas fa-check-circle"></i></span> 确定</button>
             </div>
-            <div class="progress-bg" id="progress-bg">
-                <div class="progress-inner" id="progress-inner"></div>
-                <i id="progress-icon" class="fas fa-person-walking progress-icon"></i>
-            </div>
-        </div>
-        <section class="calendar" id="calendar"></section>
-        
-        <section class="summary" id="summary">
-            <div class="stats-columns" id="stats-columns"></div>
-            <div class="total-row-salary" id="total-salary"></div>
-        </section>
-        
-        <div class="chart-container" id="chart-container">
-            <div class="chart-title"><i class="fas fa-chart-simple fa-icon-mr"></i>每周加班时长环比趋势</div>
-            <canvas id="weekly-chart" width="500" height="240" style="width:100%; height:auto; max-width:500px; aspect-ratio:500/240"></canvas>
-            <div class="weekly-stats" id="weekly-stats">
-                <span id="weekly-compare-text">加载中...</span>
-            </div>
-        </div>
-
-        <form class="input-group" id="wage-form" autocomplete="off">
-            <label for="hourly-wage"><i class="fas fa-coins fa-icon-mr"></i>时薪(元):</label>
-            <input type="number" min="1" step="1" id="hourly-wage" required>
-            <button type="submit">确定</button>
         </form>
-        
-        <!-- 加班录入弹窗 -->
-        <div class="modal-mask" id="modal-mask">
-            <div class="modal" id="modal">
-                <div><label id="modal-date-label"></label></div>
-                <input type="number" min="0" step="0.1" id="modal-input-hours">
-                <div class="modal-btns">
-                    <button type="button" id="modal-save-btn">保存</button>
-                    <button type="button" class="cancel" id="modal-cancel-btn">取消</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 自定义假日三按钮弹窗 -->
-        <div class="modal-mask" id="holiday-modal-mask">
-            <div class="modal" id="holiday-modal">
-                <div><label id="holiday-modal-label"></label></div>
-                <div class="option-buttons" id="holiday-option-buttons"></div>
-                <div class="modal-btns">
-                    <button type="button" class="cancel" id="holiday-modal-cancel">关闭</button>
-                </div>
-            </div>
-        </div>
-        <div class="toast" id="toast"></div>
-    </main>
-
-    <div class="secret-gear" id="secret-gear" title="数据工具"><i class="fas fa-cog"></i></div>
-    <div class="secret-menu" id="secret-menu">
-        <button id="backup-btn"><i class="fas fa-download fa-icon-mr"></i>备份数据</button>
-        <button id="restore-btn"><i class="fas fa-upload fa-icon-mr"></i>恢复数据</button>
     </div>
-    <input type="file" id="secret-file-input" class="secret-file-input" accept=".json">
 
-    <script>
-        // ========= 国定假日（预置）及用户自定义国假 =========
-        const PRESET_PUBLIC_HOLIDAYS = {
-            2025: ['2025-01-01','2025-01-28','2025-01-29','2025-01-30','2025-04-05','2025-05-01','2025-06-19','2025-09-27','2025-10-01','2025-10-02','2025-10-03'],
-            2026: ['2026-01-01','2026-02-17','2026-02-18','2026-02-19','2026-04-05','2026-05-01','2026-06-19','2026-09-27','2026-10-01','2026-10-02','2026-10-03'],
-            2027: ['2027-01-01','2027-02-06','2027-02-07','2027-02-08','2027-04-05','2027-05-01','2027-06-09','2027-09-16','2027-10-01','2027-10-02','2027-10-03']
-        };
-        let userPublicHolidays = new Set();
-        const USER_PUBLIC_KEY = 'userPublicHolidays';
-        function loadUserPublicHolidays() {
-            try { const arr = JSON.parse(localStorage.getItem(USER_PUBLIC_KEY) || '[]'); userPublicHolidays = new Set(arr); } catch { userPublicHolidays = new Set(); }
-        }
-        function saveUserPublicHolidays() { localStorage.setItem(USER_PUBLIC_KEY, JSON.stringify([...userPublicHolidays])); }
-        loadUserPublicHolidays();
+    <div class="footer-motto" id="footer-motto">
+        <div class="motto-text">记录，是为了抵抗遗忘。</div>
+        <div class="days-badge" id="days-badge">
+            <i class="fas fa-mug-hot"></i> <span id="running-days-text">本站已运行 0 天</span>
+        </div>
+        <div class="footer-note">Copyright © 2026 • YeoChing</div>
+    </div>
 
-        function isPublicHoliday(date) {
-            const key = formatDateKey(date);
-            if (userPublicHolidays.has(key)) return true;
-            const holidays = PRESET_PUBLIC_HOLIDAYS[date.getFullYear()];
-            return holidays ? holidays.includes(key) : false;
-        }
+    <div class="modal-mask" id="modal-mask">
+        <div class="modal" id="modal">
+            <label id="modal-date-label"></label>
+            <input type="number" min="0" step="0.1" id="modal-input-hours" placeholder="加班时长">
+            <div id="fold-section" class="fold-section" style="display: none;">
+                <div class="fold-header" id="fold-header">
+                    <span><i class="fas fa-tag"></i> 计薪类型</span>
+                    <i class="fas fa-chevron-down" id="fold-icon"></i>
+                </div>
+                <div class="fold-content" id="fold-content">
+                    <div class="type-buttons">
+                        <button data-type="workday" class="type-btn">工作日 1.5倍</button>
+                        <button data-type="holiday" class="type-btn">假日 2倍</button>
+                        <button data-type="publicholiday" class="type-btn">国假 3倍</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-btns">
+                <button type="button" id="modal-save-btn" class="save-btn">保存</button>
+                <button type="button" class="cancel-btn" id="modal-cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
 
-        const CUSTOM_HOLIDAYS_KEY = 'customHolidays';
-        function getCustomHolidaysSet() {
-            try { return new Set(JSON.parse(localStorage.getItem(CUSTOM_HOLIDAYS_KEY) || '[]')); } catch { return new Set(); }
-        }
-        function saveCustomHolidaysSet(set) { localStorage.setItem(CUSTOM_HOLIDAYS_KEY, JSON.stringify([...set])); }
-        let customHolidays = getCustomHolidaysSet();
+    <div class="modal-mask" id="debug-modal-mask">
+        <div class="ios-alert">
+            <h2>⚙️ 调试模式</h2>
+            <div class="feature-list">
+                    <p><i class="fas fa-hand-pointer"></i> 恭喜你解锁新大陆！🎉</p>
+                    <p><i class="fas fa-infinity"></i> 本模式下录入加班时长无上限</p>
+                    <p><i class="fas fa-chart-line"></i> 进度条与加班上限提示自动适配</p>
+                    <p><i class="fas fa-toolbox"></i> 点击右下角设置→备份/恢复以留存或导入数据</p>
+                    <p><i class="fas fa-calendar-alt"></i> 可修改任意日为工作日/假日/国假（计薪规则自动变更）</p>
+                </div>
+            <button class="confirm-btn" id="debug-confirm-btn"><i class="fas fa-check-circle"></i> 知道了</button>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+</main>
+<div class="secret-gear" id="secret-gear" title="数据工具"><i class="fas fa-cog"></i></div>
+<div class="secret-menu" id="secret-menu"><button id="backup-btn"><i class="fas fa-download fa-icon-mr"></i>备份数据</button><button id="restore-btn"><i class="fas fa-upload fa-icon-mr"></i>恢复数据</button></div>
+<input type="file" id="secret-file-input" class="secret-file-input" accept=".json">
 
-        // ========= 周期相关 =========
+<script>
+    (function() {
         const PERIOD_DAYS = 31;
-        function getCurrentPeriod(date = new Date()) {
-            let year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate();
-            let sYear = year, sMonth = month;
-            if (day < 21) { sMonth--; if (sMonth < 1) { sMonth = 12; sYear--; } }
-            let start = new Date(sYear, sMonth - 1, 21);
-            let end = new Date(start);
-            end.setDate(start.getDate() + PERIOD_DAYS - 1);
-            return { start, end };
-        }
-        function getDaysArray(start, end) {
-            const arr = [];
-            const d = new Date(start);
-            while (d <= end) { arr.push(new Date(d)); d.setDate(d.getDate() + 1); }
-            return arr;
-        }
+        const START_DATE = new Date(2026, 3, 22);
+
+        function formatDateKey(date) { return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-'); }
         function isWeekend(date) { return date.getDay() === 0 || date.getDay() === 6; }
-        function formatDateKey(date) {
-            return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
+        function getDaysArray(start, end) { const arr=[]; let d=new Date(start); while(d<=end){ arr.push(new Date(d)); d.setDate(d.getDate()+1); } return arr; }
+        function getCurrentPeriod(date=new Date()) { let year=date.getFullYear(), month=date.getMonth()+1, day=date.getDate(); let sYear=year, sMonth=month; if(day<21){ sMonth--; if(sMonth<1){ sMonth=12; sYear--; } } let start=new Date(sYear, sMonth-1, 21); let end=new Date(start); end.setDate(start.getDate()+PERIOD_DAYS-1); return {start,end}; }
+        function getPeriodStartFromDate(date) { let year=date.getFullYear(), month=date.getMonth()+1; let day=date.getDate(); if(day<21){ month--; if(month<1){ month=12; year--; } } return new Date(year, month-1, 21); }
+        function getPeriodKeyForDate(date) { return formatDateKey(getPeriodStartFromDate(date)); }
+
+        const PRESET_PUBLIC_HOLIDAYS = { 2025: ['2025-01-01','2025-01-28','2025-01-29','2025-01-30','2025-04-05','2025-05-01','2025-06-19','2025-09-27','2025-10-01','2025-10-02','2025-10-03'], 2026: ['2026-01-01','2026-02-17','2026-02-18','2026-02-19','2026-04-05','2026-05-01','2026-06-19','2026-09-27','2026-10-01','2026-10-02','2026-10-03'], 2027: ['2027-01-01','2027-02-06','2027-02-07','2027-02-08','2027-04-05','2027-05-01','2027-06-09','2027-09-16','2027-10-01','2027-10-02','2027-10-03'] };
+        const DAY_TYPE_OVERRIDE_KEY = 'dayTypeOverrides';
+        function getDayTypeOverrides() { try { return JSON.parse(localStorage.getItem(DAY_TYPE_OVERRIDE_KEY) || '{}'); } catch(e){ return {}; } }
+        function setDayTypeOverride(dateKey, type) { let map = getDayTypeOverrides(); if(type === null) delete map[dateKey]; else map[dateKey] = type; localStorage.setItem(DAY_TYPE_OVERRIDE_KEY, JSON.stringify(map)); }
+        function getDayType(date) {
+            let key = formatDateKey(date);
+            let overrides = getDayTypeOverrides();
+            if(overrides[key]) return overrides[key];
+            if(isPublicHolidayFallback(date)) return 'publicholiday';
+            if(isWeekend(date)) return 'holiday';
+            return 'workday';
+        }
+        function isPublicHolidayFallback(date) {
+            let key = formatDateKey(date);
+            let h = PRESET_PUBLIC_HOLIDAYS[date.getFullYear()];
+            return h ? h.includes(key) : false;
+        }
+        function getMultiplier(date) {
+            let type = getDayType(date);
+            if(type === 'publicholiday') return 3;
+            if(type === 'holiday') return 2;
+            return 1.5;
         }
 
-        // ========= 数据持久化 =========
-        const STORAGE_KEY = 'overtime_v2';
+        const STORAGE_KEY='overtime_v2';
         function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-        function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; } }
-        const WAGE_KEY = 'ot_wage';
-        function setWage(w) { localStorage.setItem(WAGE_KEY, w); }
-        function getWage() { const w = parseInt(localStorage.getItem(WAGE_KEY)); return w > 0 ? w : 30; }
+        function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); } catch(e){ return {}; } }
 
-        // ========= 调试模式 =========
+        const PERIOD_WAGE_KEY='periodWageMap';
+        function getPeriodWageMap() { try { return JSON.parse(localStorage.getItem(PERIOD_WAGE_KEY)||'{}'); } catch(e){ return {}; } }
+        function savePeriodWageMap(map) { localStorage.setItem(PERIOD_WAGE_KEY, JSON.stringify(map)); }
+        function getWageForDate(date) { let periodKey=getPeriodKeyForDate(date); let map=getPeriodWageMap(); let wage=map[periodKey]; return (wage && wage>0) ? wage : 30; }
+        function setCurrentPeriodWage(wage) { let periodKey=formatDateKey(displayPeriod.start); let map=getPeriodWageMap(); map[periodKey]=wage; savePeriodWageMap(map); }
+        function getCurrentPeriodWage() { let periodKey=formatDateKey(displayPeriod.start); let map=getPeriodWageMap(); return map[periodKey] ? map[periodKey] : 30; }
+
         let debugMode = false;
-        let dataToolsVisible = false;
-        const topCapsule = document.querySelector('.top-capsule');
         let clickCount = 0, lastClickTime = 0;
-        let secondClickCount = 0, secondLastClickTime = 0;
-        const FIRST_NEEDED = 7, SECOND_NEEDED = 5, CLICK_WINDOW = 2500;
+        const topCapsule = document.querySelector('.top-capsule');
+        function showDebugModeModal() {
+            const modal = document.getElementById('debug-modal-mask');
+            if(modal) {
+                modal.style.display = 'flex';
+                const confirmBtn = document.getElementById('debug-confirm-btn');
+                const closeModal = () => { modal.style.display = 'none'; };
+                const newBtn = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+                newBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', (e) => { if(e.target === modal) e.stopPropagation(); });
+            }
+        }
         topCapsule.addEventListener('pointerdown', function(e) {
             const now = Date.now();
-            if (!debugMode) {
-                if (now - lastClickTime > CLICK_WINDOW) clickCount = 1;
+            if(!debugMode) {
+                if(now - lastClickTime > 2500) clickCount = 1;
                 else clickCount++;
                 lastClickTime = now;
-                if (clickCount >= FIRST_NEEDED) {
+                if(clickCount >= 7){
                     debugMode = true;
                     clickCount = 0;
-                    showToast('<i class="fas fa-wrench fa-icon-mr"></i>调试模式已开启，长按日期可自定义假日，加班无上限');
+                    showDebugModeModal();
                     document.getElementById('secret-gear').style.display = 'flex';
-                    e.preventDefault();
                     render();
-                }
-                return;
-            }
-            if (!dataToolsVisible) {
-                if (now - secondLastClickTime > CLICK_WINDOW) secondClickCount = 1;
-                else secondClickCount++;
-                secondLastClickTime = now;
-                if (secondClickCount >= SECOND_NEEDED) {
-                    dataToolsVisible = true;
-                    secondClickCount = 0;
-                    showToast('<i class="fas fa-box fa-icon-mr"></i>数据工具已就绪');
                     e.preventDefault();
                 }
             }
         });
+        function showToast(msg) { let t=document.getElementById('toast'); t.innerHTML=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerHTML = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
+        let displayPeriod=getCurrentPeriod();
+        function goToPeriod(startDate) { let end=new Date(startDate); end.setDate(startDate.getDate()+PERIOD_DAYS-1); displayPeriod={start:new Date(startDate), end}; render(); }
+        function getPrevPeriodStart(cur) { let y=cur.getFullYear(), m=cur.getMonth()-1; if(m<0){ m=11; y--; } return new Date(y,m,21); }
+        function getNextPeriodStart(cur) { let y=cur.getFullYear(), m=cur.getMonth()+1; if(m>11){ m=0; y++; } return new Date(y,m,21); }
+        document.getElementById('prev-period-btn').onclick=()=>goToPeriod(getPrevPeriodStart(displayPeriod.start));
+        document.getElementById('next-period-btn').onclick=()=>goToPeriod(getNextPeriodStart(displayPeriod.start));
+        document.getElementById('today-period-btn').onclick=()=>{ displayPeriod=getCurrentPeriod(); render(); };
 
-        // ========= 备份恢复 =========
-        const gear = document.getElementById('secret-gear'), menu = document.getElementById('secret-menu'), fileInput = document.getElementById('secret-file-input');
-        gear.addEventListener('click', e => { e.stopPropagation(); menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; });
-        document.addEventListener('click', () => { menu.style.display = 'none'; });
-        menu.addEventListener('click', e => e.stopPropagation());
-        document.getElementById('backup-btn').addEventListener('click', () => {
-            const data = { overtime: loadData(), customHolidays: [...getCustomHolidaysSet()], userPublicHolidays: [...userPublicHolidays], wage: getWage() };
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.download = `加班备份_${new Date().toISOString().slice(0,10)}.json`;
-            a.href = URL.createObjectURL(blob);
-            a.click();
-            URL.revokeObjectURL(a.href);
-            showToast('<i class="fas fa-check-circle fa-icon-mr"></i>数据已备份');
-            menu.style.display = 'none';
-        });
-        document.getElementById('restore-btn').addEventListener('click', () => { fileInput.click(); menu.style.display = 'none'; });
-        fileInput.addEventListener('change', e => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = ev => {
-                try {
-                    const backup = JSON.parse(ev.target.result);
-                    if (backup.overtime) saveData(backup.overtime);
-                    if (backup.customHolidays) saveCustomHolidaysSet(new Set(backup.customHolidays));
-                    if (backup.userPublicHolidays) { userPublicHolidays = new Set(backup.userPublicHolidays); saveUserPublicHolidays(); }
-                    if (typeof backup.wage === 'number' && backup.wage > 0) setWage(backup.wage);
-                    showToast('<i class="fas fa-check-circle fa-icon-mr"></i>数据已恢复');
-                    setTimeout(() => location.reload(), 500);
-                } catch { alert('文件格式不正确'); }
-            };
-            reader.readAsText(file);
-            fileInput.value = '';
-        });
-
-        // ========= 周期切换 =========
-        let displayPeriod = getCurrentPeriod();
-        function goToPeriod(startDate) {
-            const endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + PERIOD_DAYS - 1);
-            displayPeriod = { start: new Date(startDate), end: endDate };
-            render();
-        }
-        function getPrevPeriodStart(cur) {
-            let y = cur.getFullYear(), m = cur.getMonth() - 1;
-            if (m < 0) { m = 11; y--; }
-            return new Date(y, m, 21);
-        }
-        function getNextPeriodStart(cur) {
-            let y = cur.getFullYear(), m = cur.getMonth() + 1;
-            if (m > 11) { m = 0; y++; }
-            return new Date(y, m, 21);
-        }
-        document.getElementById('prev-period-btn').addEventListener('click', () => goToPeriod(getPrevPeriodStart(displayPeriod.start)));
-        document.getElementById('next-period-btn').addEventListener('click', () => goToPeriod(getNextPeriodStart(displayPeriod.start)));
-        document.getElementById('today-period-btn').addEventListener('click', () => { displayPeriod = getCurrentPeriod(); render(); });
-
-        // ========= 长按菜单（调试模式） =========
-        let longPressTimer = null, longPressStartPos = { x:0, y:0 };
-        const LONG_PRESS_DURATION = 600, MOVE_THRESHOLD = 10;
-        let pendingLongPressDateKey = null;
-
-        function onPointerDown(e) {
-            if (!debugMode) return;
-            const cell = e.target.closest('.calendar-cell');
-            if (!cell || cell.classList.contains('cell-blank')) return;
-            const dateKey = cell.dataset.datekey;
-            if (!dateKey) return;
-            pendingLongPressDateKey = dateKey;
-            longPressStartPos = { x: e.clientX, y: e.clientY };
-            longPressTimer = setTimeout(() => {
-                if (pendingLongPressDateKey) { showHolidayModal(pendingLongPressDateKey); pendingLongPressDateKey = null; }
-                longPressTimer = null;
-            }, LONG_PRESS_DURATION);
-        }
-        function onPointerUp() { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; pendingLongPressDateKey = null; } }
-        function onPointerMove(e) {
-            if (longPressTimer && (Math.abs(e.clientX - longPressStartPos.x) > MOVE_THRESHOLD || Math.abs(e.clientY - longPressStartPos.y) > MOVE_THRESHOLD)) {
-                clearTimeout(longPressTimer); longPressTimer = null; pendingLongPressDateKey = null;
-            }
-        }
-
-        function showHolidayModal(dateKey) {
-            const date = new Date(dateKey + 'T00:00:00');
-            const isPub = isPublicHoliday(date);
-            const isCustom = customHolidays.has(dateKey);
-            let currentType = "";
-            if (isPub) currentType = "国假（3倍）";
-            else if (isCustom) currentType = "自定义假日（2倍）";
-            else if (isWeekend(date)) currentType = "周末（2倍）";
-            else currentType = "普通工作日（1.5倍）";
-            
-            const modal = document.getElementById('holiday-modal-mask');
-            const label = document.getElementById('holiday-modal-label');
-            label.innerHTML = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}<br>当前：${currentType}`;
-            const btnsDiv = document.getElementById('holiday-option-buttons');
-            btnsDiv.innerHTML = `
-                <button id="holiday-custom-btn"><i class="fa-regular fa-sun"></i> 设为自定义假日（2倍）</button>
-                <button id="holiday-public-btn"><i class="fas fa-landmark"></i> 设为国假（3倍）</button>
-                <button id="holiday-reset-btn"><i class="fa-regular fa-calendar"></i> 恢复普通工作日</button>
-            `;
-            modal.style.display = 'flex';
-            
-            const customBtn = document.getElementById('holiday-custom-btn');
-            const publicBtn = document.getElementById('holiday-public-btn');
-            const resetBtn = document.getElementById('holiday-reset-btn');
-            const closeBtn = document.getElementById('holiday-modal-cancel');
-            const closeModal = () => { modal.style.display = 'none'; };
-            customBtn.onclick = () => {
-                if (isPublicHoliday(date)) userPublicHolidays.delete(dateKey);
-                customHolidays.add(dateKey);
-                saveCustomHolidaysSet(customHolidays);
-                saveUserPublicHolidays();
-                showToast(`已将 ${dateKey} 设为自定义假日（2倍）`);
-                closeModal(); render();
-            };
-            publicBtn.onclick = () => {
-                if (customHolidays.has(dateKey)) { customHolidays.delete(dateKey); saveCustomHolidaysSet(customHolidays); }
-                userPublicHolidays.add(dateKey);
-                saveUserPublicHolidays();
-                showToast(`已将 ${dateKey} 设为国假（3倍）`);
-                closeModal(); render();
-            };
-            resetBtn.onclick = () => {
-                let changed = false;
-                if (userPublicHolidays.has(dateKey)) { userPublicHolidays.delete(dateKey); saveUserPublicHolidays(); changed = true; }
-                if (customHolidays.has(dateKey)) { customHolidays.delete(dateKey); saveCustomHolidaysSet(customHolidays); changed = true; }
-                if (changed) showToast(`已将 ${dateKey} 恢复为普通工作日`);
-                else showToast(`${dateKey} 本来就是普通工作日`);
-                closeModal(); render();
-            };
-            closeBtn.onclick = closeModal;
-            modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-        }
-
-        // ========= 每周加班柱状图 =========
-        function computeWeeklyHours(startDate, endDate) {
-            const days = getDaysArray(startDate, endDate);
-            const overtimeMap = loadData();
-            const weeksMap = new Map();
-            for (let d of days) {
-                const dayOfWeek = d.getDay();
-                const monday = new Date(d);
-                const diff = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-                monday.setDate(d.getDate() + diff);
-                const weekKey = formatDateKey(monday);
-                const sunday = new Date(monday);
-                sunday.setDate(monday.getDate() + 6);
-                if (!weeksMap.has(weekKey)) {
-                    weeksMap.set(weekKey, { 
-                        label: `${monday.getMonth()+1}/${monday.getDate()}~${sunday.getMonth()+1}/${sunday.getDate()}`,
-                        hours: 0, start: new Date(monday), end: new Date(sunday)
-                    });
-                }
-                const key = formatDateKey(d);
-                const val = parseFloat(overtimeMap[key]?.h) || 0;
-                weeksMap.get(weekKey).hours += val;
-            }
-            const weeks = Array.from(weeksMap.values());
-            weeks.sort((a,b) => a.start - b.start);
-            return weeks;
-        }
-
-        function drawWeeklyChart() {
-            const canvas = document.getElementById('weekly-chart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const weeksData = computeWeeklyHours(displayPeriod.start, displayPeriod.end);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const historyWeeks = weeksData.filter(w => w.end <= today);
-            let recentWeek = null, prevWeek = null;
-            if (historyWeeks.length >= 1) {
-                recentWeek = historyWeeks[historyWeeks.length - 1];
-                if (historyWeeks.length >= 2) prevWeek = historyWeeks[historyWeeks.length - 2];
-            }
-            
-            if (!weeksData.length) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.font = '13px sans-serif';
-                ctx.fillStyle = '#9aa3c0';
-                ctx.textAlign = 'center';
-                ctx.fillText('📭 当前周期暂无加班记录', canvas.width/2, canvas.height/2);
-                document.getElementById('weekly-compare-text').innerHTML = '暂无周数据';
-                return;
-            }
-            
-            const maxHours = Math.max(...weeksData.map(w => w.hours), 0.1);
-            const barWidth = (canvas.width - 70) / weeksData.length * 0.7;
-            const startX = 45;
-            const baseY = canvas.height - 35;
-            const maxHeight = canvas.height - 60;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath();
-            ctx.strokeStyle = '#b8c4e6';
-            ctx.lineWidth = 1;
-            ctx.moveTo(30, 10);
-            ctx.lineTo(30, baseY);
-            ctx.lineTo(canvas.width-15, baseY);
-            ctx.stroke();
-            for (let i=0; i<weeksData.length; i++) {
-                const w = weeksData[i];
-                const h = w.hours;
-                const barHeight = (h / maxHours) * maxHeight;
-                const x = startX + i * (barWidth + 12);
-                const y = baseY - barHeight;
-                ctx.fillStyle = '#5866ef';
-                ctx.fillRect(x, y, barWidth, barHeight);
-                ctx.fillStyle = '#2d3c9e';
-                ctx.font = '10px "Segoe UI"';
-                ctx.textAlign = 'center';
-                ctx.fillText(w.label, x + barWidth/2, baseY + 12);
-                ctx.fillStyle = '#4d60ad';
-                ctx.fillText(h.toFixed(1)+'h', x + barWidth/2, y-3);
-            }
-            
-            let compareHtml = '';
-            if (recentWeek) {
-                if (prevWeek) {
-                    const diff = recentWeek.hours - prevWeek.hours;
-                    let percent = 0;
-                    if (prevWeek.hours > 0) percent = (diff / prevWeek.hours) * 100;
-                    else if (recentWeek.hours > 0) percent = 100;
-                    const symbol = diff > 0 ? '<i class="fas fa-arrow-up"></i> ' : (diff < 0 ? '<i class="fas fa-arrow-down"></i> ' : '<i class="fas fa-equals"></i> ');
-                    const absPercent = Math.abs(percent).toFixed(1);
-                    compareHtml = `<i class="fas fa-calendar-week"></i> 结束周（${recentWeek.label}）加班 ${recentWeek.hours.toFixed(1)}h，同比前周（${prevWeek.label}） ${symbol}${diff !==0 ? Math.abs(diff).toFixed(1)+'h' : '持平'} ${diff !==0 ? `(${symbol}${absPercent}%)` : ''}`;
+        let currentEditingKey = null;
+        function setupFoldLogic() {
+            const foldHeader = document.getElementById('fold-header');
+            const foldContent = document.getElementById('fold-content');
+            const foldIcon = document.getElementById('fold-icon');
+            if(!foldHeader) return;
+            foldHeader.onclick = () => {
+                const isOpen = foldContent.classList.contains('open');
+                if(isOpen) {
+                    foldContent.classList.remove('open');
+                    foldIcon.className = 'fas fa-chevron-down';
                 } else {
-                    compareHtml = `<i class="fas fa-calendar-week"></i> 结束周（${recentWeek.label}）加班 ${recentWeek.hours.toFixed(1)}h（无更早周可比）`;
+                    foldContent.classList.add('open');
+                    foldIcon.className = 'fas fa-chevron-up';
                 }
-            } else {
-                compareHtml = '<i class="fas fa-inbox"></i> 当前周期暂无已结束的完整周数据（未来周不纳入同比）';
-            }
-            document.getElementById('weekly-compare-text').innerHTML = compareHtml;
-        }
-
-        // ========= 顶部小胶囊 + 滚动标语 =========
-        function getCurrentPeriodTotalHours() {
-            const days = getDaysArray(displayPeriod.start, displayPeriod.end);
-            const data = loadData();
-            let total = 0;
-            for (let d of days) { const key = formatDateKey(d); total += parseFloat(data[key]?.h) || 0; }
-            return total;
-        }
-
-        function getSmartSlogan(totalHours) {
-            const icons = { zero: '<i class="fas fa-spa"></i>', low: '<i class="fas fa-walking"></i>', mid: '<i class="fas fa-chart-line"></i>', high: '<i class="fas fa-fire"></i>', extreme: '<i class="fas fa-skull-crossbones"></i>' };
-            if (totalHours <= 0) {
-                const msgs = [`${icons.zero} 本周加班为0，享受久违的悠闲吧 ${icons.zero}`, `${icons.zero} 完美规避加班，建议买张彩票试试 ${icons.zero}`, `${icons.zero} 零加班成就达成，奖励自己一杯奶茶吧 <i class="fas fa-mug-hot"></i>`, `${icons.zero} 工作生活平衡大师，向你学习 <i class="fas fa-hand-peace"></i>`];
-                return msgs[Math.floor(Math.random() * msgs.length)];
-            }
-            if (totalHours < 10) {
-                const msgs = [`${icons.low} 轻度加班，注意活动颈椎，多眨眼 <i class="fas fa-eye"></i>`, `${icons.low} 加班${totalHours.toFixed(1)}h，摸摸鱼喝喝水，明天又是新的一天 <i class="fas fa-fish"></i>`, `${icons.low} 小加怡情，大加伤身，今日份努力已达标 <i class="fas fa-chart-simple"></i>`, `${icons.low} 打工魂在燃烧，但记得按时吃饭哦 <i class="fas fa-utensils"></i>`];
-                return msgs[Math.floor(Math.random() * msgs.length)];
-            }
-            if (totalHours < 20) {
-                const msgs = [`${icons.mid} 中度加班${totalHours.toFixed(1)}h，周末补觉回血 <i class="fas fa-bed"></i>`, `${icons.mid} 奋斗气息浓厚，建议抬头望望天空 <i class="fas fa-cloud-sun"></i>`, `${icons.mid} 离爆肝还有距离，但别掉以轻心 <i class="fas fa-heartbeat"></i>`, `${icons.mid} 加班时数${totalHours.toFixed(1)}h，你是公司的脊梁 <i class="fas fa-dragon"></i>`];
-                return msgs[Math.floor(Math.random() * msgs.length)];
-            }
-            if (totalHours < 35) {
-                const msgs = [`${icons.high} 高强度加班${totalHours.toFixed(1)}h！请务必安排休息 <i class="fas fa-hand-holding-heart"></i>`, `${icons.high} 爆肝预警！连续加班小心秃头 <i class="fas fa-skull"></i>`, `${icons.high} 你已进入“卷王”候选区，快喝口枸杞压惊 <i class="fas fa-mug-hot"></i>`, `${icons.high} 加班${totalHours.toFixed(1)}h，老板看了都流泪 <i class="fas fa-trophy"></i>`];
-                return msgs[Math.floor(Math.random() * msgs.length)];
-            }
-            const msgs = [`${icons.extreme} 极限爆肝！${totalHours.toFixed(1)}h！请立即休息，健康第一 <i class="fas fa-ambulance"></i>`, `${icons.extreme} 这不是加班，这是玩命！快逃.jpg <i class="fas fa-person-running"></i>`, `${icons.extreme} 超人本超，但超人也需要睡觉 <i class="fas fa-moon"></i>`, `${icons.extreme} 加班${totalHours.toFixed(1)}h，建议向劳动监察致敬 <i class="fas fa-gavel"></i>`];
-            return msgs[Math.floor(Math.random() * msgs.length)];
-        }
-
-        function updateHeaderContent() {
-            const total = getCurrentPeriodTotalHours();
-            document.getElementById('total-hours-display').innerHTML = `${total.toFixed(1)}h`;
-            const slogan = getSmartSlogan(total);
-            document.getElementById('header-slogan').innerHTML = slogan;
-        }
-
-        // ========= 三列统计 + 薪资合计 =========
-        function updateSummaryColumns(start, end) {
-            const data = loadData(), wage = getWage();
-            let tempH=0, holiH=0, pubH=0;
-            let tempFee=0, holiFee=0, pubFee=0;
-            getDaysArray(start, end).forEach(d => {
-                const key = formatDateKey(d), val = parseFloat(data[key]?.h) || 0;
-                if (!val) return;
-                if (isPublicHoliday(d)) { pubH += val; pubFee += val * wage * 3; }
-                else if (isWeekend(d) || customHolidays.has(key)) { holiH += val; holiFee += val * wage * 2; }
-                else { tempH += val; tempFee += val * wage * 1.5; }
-            });
-            const totalFee = tempFee + holiFee + pubFee;
-            
-            const columnsHtml = `
-                <div class="stat-card">
-                    <i class="fa-regular fa-moon"></i>
-                    <div class="stat-label">临时加班</div>
-                    <div class="stat-hours">${tempH.toFixed(1)}<span style="font-size:0.6rem;">h</span></div>
-                    <div class="stat-multiplier">1.5倍</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fa-regular fa-sun"></i>
-                    <div class="stat-label">假日加班</div>
-                    <div class="stat-hours">${holiH.toFixed(1)}<span style="font-size:0.6rem;">h</span></div>
-                    <div class="stat-multiplier">2倍</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-landmark"></i>
-                    <div class="stat-label">国假加班</div>
-                    <div class="stat-hours">${pubH.toFixed(1)}<span style="font-size:0.6rem;">h</span></div>
-                    <div class="stat-multiplier">3倍</div>
-                </div>
-            `;
-            document.getElementById('stats-columns').innerHTML = columnsHtml;
-            document.getElementById('total-salary').innerHTML = `<i class="fas fa-coins"></i> 加班薪资合计：<strong>￥${totalFee.toFixed(2)}</strong>`;
-        }
-
-        // ========= 日历渲染（含进度条，支持调试模式超限显示） =========
-        function renderCalendar(start, end, today) {
-            const days = getDaysArray(start, end);
-            let html = ['<div class="calendar-header">'+["一","二","三","四","五","六","日"].map(d=>`<span>${d}</span>`).join('')+'</div>'];
-            const blanks = (days[0].getDay() + 6) % 7;
-            const cells = Array(blanks).fill('').concat(days);
-            const data = loadData();
-            let row = [];
-            for (let i = 0; i < cells.length; i++) {
-                if (typeof cells[i] === 'string') {
-                    row.push('<div class="calendar-cell cell-blank"></div>');
-                } else {
-                    const d = cells[i], key = formatDateKey(d);
-                    const isPub = isPublicHoliday(d), isWk = isWeekend(d);
-                    const isToday = d.toDateString() === today.toDateString();
-                    const isCustom = !isPub && !isWk && customHolidays.has(key);
-                    const h = data[key]?.h;
-                    let bar = '', valShow = '';
-                    if (h != null && h > 0) {
-                        // 确定上限（仅用于比例计算，调试模式下可超限）
-                        const maxLimit = (isPub || isWk || isCustom) ? 8 : 4;
-                        let frac = h / maxLimit;
-                        let cls = '';
-                        if (debugMode && h > maxLimit) {
-                            // 调试模式下超过上限，进度条满格并标记为危险
-                            frac = 1;
-                            cls = 'full';
-                        } else {
-                            cls = frac > 0.99 ? 'full' : (frac > 0.66 ? 'warn' : '');
-                        }
-                        const widthPercent = Math.min(frac * 100, 100);
-                        bar = `<div class="cell-ot-bar-bg"><div class="cell-ot-bar ${cls}" style="width:${widthPercent}%"></div></div>`;
-                        valShow = `<div class="cell-ot-num">${h}h</div>`;
+            };
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    const type = btn.dataset.type;
+                    if(type && currentEditingKey) {
+                        setDayTypeOverride(currentEditingKey, type);
+                        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        showToast(`已设为 ${btn.innerText}`);
+                        render();
                     }
-                    const attrs = [isWk && !isPub ? 'data-weekend="1"' : '', isPub ? 'data-pubholiday="1"' : ''].filter(Boolean).join(' ');
-                    const cls = `${isToday?' today':''}${isCustom?' custom-holiday':''}`;
-                    let starIcons = '';
-                    if (isPub) starIcons = `<i class="fas fa-star holiday-star" style="position:absolute; top:-7px; right:-12px; font-size:0.5em; color:var(--pubholiday-accent);"></i>`;
-                    else if (isCustom) starIcons = `<i class="fas fa-star custom-star" style="position:absolute; top:-7px; right:-12px; font-size:0.5em; color:#a0a0c0; opacity:0.8;"></i>`;
-                    row.push(`<div class="calendar-cell${cls}" tabindex="0" data-datekey="${key}" ${attrs} onclick="onCellClick('${key}')"><div class="cell-date" style="position:relative;">${d.getDate()}${starIcons}</div>${bar}${valShow}</div>`);
-                }
-                if ((i+1)%7 === 0 || i === cells.length-1) {
-                    html.push(`<div class="calendar-row">${row.join('')}</div>`);
-                    row = [];
-                }
-            }
-            document.getElementById('calendar').innerHTML = html.join('');
+                    e.stopPropagation();
+                };
+            });
         }
 
-        function showWageInput() {
-            const form = document.getElementById('wage-form'), input = document.getElementById('hourly-wage');
-            if (input) input.value = getWage();
-            form.onsubmit = e => {
-                e.preventDefault();
-                const v = parseInt(input.value.trim()) || 30;
-                setWage(v);
-                render();
-                return false;
-            };
-        }
-
-        function updateProgressIconPosition() {
-            const progressInner = document.getElementById('progress-inner');
-            const icon = document.getElementById('progress-icon');
-            if (!progressInner || !icon) return;
-            const parentWidth = progressInner.parentElement.clientWidth;
-            const progressPercent = parseFloat(progressInner.style.width) / 100;
-            let leftPercent = Math.min(1, Math.max(0, progressPercent));
-            const leftPx = leftPercent * parentWidth;
-            icon.style.left = leftPx + 'px';
-        }
-
-        // ========= 加班录入弹窗（调试模式无上限） =========
         window.onCellClick = function(key) {
-            const mask = document.getElementById('modal-mask'), input = document.getElementById('modal-input-hours'), label = document.getElementById('modal-date-label');
-            const date = new Date(key + 'T00:00:00');
-            const isPub = isPublicHoliday(date), isWk = isWeekend(date), isCustom = !isPub && !isWk && customHolidays.has(key);
-            let max, type, upperLimitText;
-            if (debugMode) {
-                // 调试模式：无上限
-                max = Infinity;
-                type = isPub ? '<span class="pub-badge"><i class="fas fa-landmark"></i> 国假 · 3倍</span>' : (isWk || isCustom) ? '<i class="fa-regular fa-sun"></i> 假日·2倍' : '<i class="fa-regular fa-moon"></i> 工作日·1.5倍';
-                upperLimitText = '调试模式：无上限';
-            } else {
-                if (isPub) { max = 8; type = '<span class="pub-badge"><i class="fas fa-landmark"></i> 国假 · 3倍</span>'; upperLimitText = `上限${max}h`; }
-                else if (isWk || isCustom) { max = 8; type = '<i class="fa-regular fa-sun"></i> 假日·2倍'; upperLimitText = `上限${max}h`; }
-                else { max = 4; type = '<i class="fa-regular fa-moon"></i> 工作日·1.5倍'; upperLimitText = `上限${max}h`; }
-            }
+            const mask = document.getElementById('modal-mask');
+            const input = document.getElementById('modal-input-hours');
+            const label = document.getElementById('modal-date-label');
+            const date = new Date(key+'T00:00:00');
+            currentEditingKey = key;
             const data = loadData();
-            input.value = data[key]?.h ?? '';
-            if (!debugMode) input.max = max;
-            else input.removeAttribute('max');
-            input.min = 0;
-            label.innerHTML = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${type}，${upperLimitText}`;
+            const existingHours = data[key]?.h || '';
+            input.value = existingHours;
+            let currentTypeObj = getDayType(date);
+            let typeText = currentTypeObj === 'publicholiday' ? '国假·3倍' : (currentTypeObj === 'holiday' ? '假日·2倍' : '工作日·1.5倍');
+            label.innerHTML = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}<br><span class="type-badge"><i class="fas fa-chart-simple"></i> 当前类型：${typeText}</span>`;
+            const foldSection = document.getElementById('fold-section');
+            if(debugMode) {
+                foldSection.style.display = 'block';
+                const overrideMap = getDayTypeOverrides();
+                const currentOverride = overrideMap[key] || currentTypeObj;
+                document.querySelectorAll('.type-btn').forEach(btn => {
+                    if(btn.dataset.type === currentOverride) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+                const foldContent = document.getElementById('fold-content');
+                const foldIcon = document.getElementById('fold-icon');
+                if(foldContent) {
+                    foldContent.classList.remove('open');
+                    if(foldIcon) foldIcon.className = 'fas fa-chevron-down';
+                }
+            } else {
+                foldSection.style.display = 'none';
+            }
             mask.style.display = 'flex';
-            input.focus(); input.select();
+            input.focus();
             window.modalSaveHandler = () => {
                 let v = parseFloat(input.value) || 0;
                 v = Math.max(0, v);
-                if (!debugMode) v = Math.min(max, v);
-                // 保留一位小数
+                if(!debugMode) {
+                    let maxLimit = (currentTypeObj === 'publicholiday' || currentTypeObj === 'holiday') ? 8 : 4;
+                    v = Math.min(maxLimit, v);
+                }
                 v = Math.round(v * 10) / 10;
-                if (!data[key]) data[key] = {};
+                if(!data[key]) data[key] = {};
                 v === 0 ? delete data[key].h : data[key].h = v;
                 saveData(data);
                 mask.style.display = 'none';
@@ -1118,45 +582,347 @@
             };
             document.getElementById('modal-save-btn').onclick = window.modalSaveHandler;
             document.getElementById('modal-cancel-btn').onclick = () => { mask.style.display = 'none'; };
-            input.onkeydown = e => { if (e.key === 'Enter') window.modalSaveHandler(); };
-            mask.onclick = e => { if (e.target === mask) mask.style.display = 'none'; };
+            input.onkeydown = e => { if(e.key === 'Enter') window.modalSaveHandler(); };
+            mask.onclick = e => { if(e.target === mask) mask.style.display = 'none'; };
         };
 
-        // ========= 渲染主函数 =========
-        function render() {
-            customHolidays = getCustomHolidaysSet();
-            loadUserPublicHolidays();
-            const now = new Date();
-            const p = displayPeriod;
-            document.getElementById('period-label').innerHTML = `考勤周期：${p.start.getFullYear()}/${p.start.getMonth()+1}/${p.start.getDate()} - ${p.end.getFullYear()}/${p.end.getMonth()+1}/${p.end.getDate()}`;
-            const total = Math.round((p.end - p.start) / 86400000) + 1;
-            const cur = Math.min(total, Math.max(0, Math.round((now - p.start) / 86400000) + 1));
-            const percent = (cur / total) * 100;
-            const progressInner = document.getElementById('progress-inner');
-            progressInner.style.width = `${percent}%`;
-            setTimeout(() => updateProgressIconPosition(), 10);
-            renderCalendar(p.start, p.end, now);
-            updateSummaryColumns(p.start, p.end);
-            drawWeeklyChart();
-            showWageInput();
-            updateHeaderContent();
-            
-            const cal = document.getElementById('calendar');
-            if (cal) {
-                cal.removeEventListener('pointerdown', onPointerDown);
-                cal.removeEventListener('pointerup', onPointerUp);
-                cal.removeEventListener('pointermove', onPointerMove);
-                if (debugMode) {
-                    cal.addEventListener('pointerdown', onPointerDown);
-                    cal.addEventListener('pointerup', onPointerUp);
-                    cal.addEventListener('pointermove', onPointerMove);
+        function drawSmoothCurve(ctx, points, lineColor, fillGradient, lineWidth, baseY) {
+            if(points.length<2) return;
+            let curvePoints = [];
+            for(let i=0; i<points.length-1; i++) {
+                const p0 = points[Math.max(0, i-1)];
+                const p1 = points[i];
+                const p2 = points[i+1];
+                const p3 = points[Math.min(points.length-1, i+2)];
+                for(let t=0; t<=1; t+=0.08) {
+                    const t2 = t*t, t3 = t2*t;
+                    const x = 0.5 * ((2*p1.x) + (-p0.x + p2.x)*t + (2*p0.x -5*p1.x +4*p2.x -p3.x)*t2 + (-p0.x +3*p1.x -3*p2.x +p3.x)*t3);
+                    const y = 0.5 * ((2*p1.y) + (-p0.y + p2.y)*t + (2*p0.y -5*p1.y +4*p2.y -p3.y)*t2 + (-p0.y +3*p1.y -3*p2.y +p3.y)*t3);
+                    curvePoints.push({x, y});
                 }
             }
+            curvePoints.push(points[points.length-1]);
+            if(curvePoints.length===0) curvePoints = points;
+            ctx.beginPath();
+            ctx.moveTo(curvePoints[0].x, curvePoints[0].y);
+            for(let i=1; i<curvePoints.length; i++) ctx.lineTo(curvePoints[i].x, curvePoints[i].y);
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+            ctx.lineTo(curvePoints[curvePoints.length-1].x, baseY);
+            ctx.lineTo(curvePoints[0].x, baseY);
+            ctx.closePath();
+            ctx.fillStyle = fillGradient;
+            ctx.fill();
         }
-        
+        function getCumulativeCurveUpToToday(start,end) {
+            const today = new Date(); today.setHours(0,0,0,0);
+            let days = getDaysArray(start,end).filter(d => d <= today);
+            let data = loadData();
+            let cumulative = 0, points = [];
+            for(let d of days){
+                let key = formatDateKey(d);
+                let h = parseFloat(data[key]?.h)||0;
+                cumulative += h;
+                points.push({date: new Date(d), cumulative});
+            }
+            return points;
+        }
+        function getYearPeriodsUntilToday(refYear = new Date().getFullYear()) {
+            let periods = [];
+            let startOfYear = new Date(refYear,0,1);
+            let curPeriodStart = getPeriodStartFromDate(startOfYear);
+            let today = new Date(); today.setHours(0,0,0,0);
+            let pStart = new Date(curPeriodStart);
+            while(pStart.getFullYear() <= refYear) {
+                if(pStart > today) break;
+                let pEnd = new Date(pStart); pEnd.setDate(pStart.getDate() + PERIOD_DAYS - 1);
+                let total = 0;
+                let days = getDaysArray(pStart, pEnd);
+                let ov = loadData();
+                for(let d of days){
+                    let key = formatDateKey(d);
+                    total += parseFloat(ov[key]?.h)||0;
+                }
+                periods.push({start: new Date(pStart), end: pEnd, hours: total});
+                let next = new Date(pStart);
+                next.setMonth(pStart.getMonth() + 1);
+                pStart = new Date(next.getFullYear(), next.getMonth(), 21);
+                if(pStart.getFullYear() > refYear) break;
+            }
+            return periods;
+        }
+        let activeChartIndex = 0;
+        function drawTrendChart() {
+            let canvas = document.getElementById('trendChart');
+            if(!canvas) return;
+            let ctx = canvas.getContext('2d');
+            let w = canvas.clientWidth, h = canvas.clientHeight;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0,0,w,h);
+            const margin = {left: 16, right: 16, top: 18, bottom: 32};
+            const graphW = w - margin.left - margin.right;
+            const graphH = h - margin.top - margin.bottom;
+            if(graphW <= 10) return;
+            ctx.beginPath();
+            ctx.strokeStyle = '#cbd6f0';
+            ctx.lineWidth = 1;
+            ctx.moveTo(margin.left, h - margin.bottom);
+            ctx.lineTo(w - margin.right, h - margin.bottom);
+            ctx.stroke();
+            if(activeChartIndex === 0) {
+                let pointsData = getCumulativeCurveUpToToday(displayPeriod.start, displayPeriod.end);
+                if(pointsData.length === 0){
+                    ctx.fillStyle = '#9aa3c0';
+                    ctx.font = '13px "Segoe UI"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('📭 暂无记录', w/2, h/2);
+                    document.getElementById('chartNote').innerHTML = '📈 月度累积走势';
+                    return;
+                }
+                let maxCum = Math.max(...pointsData.map(p=>p.cumulative), 0.1);
+                let xs = [];
+                for(let i=0; i<pointsData.length; i++) {
+                    let x = margin.left + (i / (pointsData.length-1)) * graphW;
+                    let y = margin.top + graphH - (pointsData[i].cumulative / maxCum) * graphH;
+                    xs.push({x, y, date: pointsData[i].date, val: pointsData[i].cumulative});
+                }
+                const grad = ctx.createLinearGradient(0, margin.top, 0, h - margin.bottom);
+                grad.addColorStop(0, 'rgba(88,102,239,0.45)');
+                grad.addColorStop(1, 'rgba(88,102,239,0.02)');
+                drawSmoothCurve(ctx, xs, '#5866ef', grad, 2.6, h - margin.bottom);
+                xs.forEach((pt, idx) => {
+                    if(idx % Math.ceil(pointsData.length/5) === 0 || idx === pointsData.length-1){
+                        ctx.fillStyle = '#2d3c9e';
+                        ctx.font = '9px "Segoe UI"';
+                        ctx.fillText(`${pt.date.getMonth()+1}/${pt.date.getDate()}`, pt.x-15, h - margin.bottom + 10);
+                        ctx.fillStyle = '#4d60ad';
+                        ctx.fillText(pt.val.toFixed(1)+'h', pt.x-8, pt.y-6);
+                    }
+                });
+                document.getElementById('chartNote').innerHTML = '📈 本月累积时数';
+            } else {
+                let periods = getYearPeriodsUntilToday(new Date().getFullYear());
+                if(periods.length === 0){
+                    ctx.fillStyle = '#9aa3c0';
+                    ctx.font = '13px "Segoe UI"';
+                    ctx.fillText('📭 暂无数据', w/4, h/4);
+                    document.getElementById('chartNote').innerHTML = '📆 本年加班时数';
+                    return;
+                }
+                let maxH = Math.max(...periods.map(p=>p.hours), 0.1);
+                let xs = [];
+                for(let i=0; i<periods.length; i++) {
+                    let x = margin.left + (i / (periods.length-1)) * graphW;
+                    let y = margin.top + graphH - (periods[i].hours / maxH) * graphH;
+                    xs.push({x, y, label: `${periods[i].start.getMonth()+1}/${periods[i].start.getDate()}`, hours: periods[i].hours});
+                }
+                const grad = ctx.createLinearGradient(0, margin.top, 0, h - margin.bottom);
+                grad.addColorStop(0, 'rgba(247,163,92,0.45)');
+                grad.addColorStop(1, 'rgba(247,163,92,0.02)');
+                drawSmoothCurve(ctx, xs, '#f7a35c', grad, 2.6, h - margin.bottom);
+                xs.forEach((pt, idx) => {
+                    if(idx % Math.ceil(periods.length/5) === 0 || idx === periods.length-1){
+                        ctx.fillStyle = '#c96b1a';
+                        ctx.font = '9px "Segoe UI"';
+                        ctx.fillText(pt.label, pt.x-15, h - margin.bottom + 10);
+                        ctx.fillStyle = '#b85c0e';
+                        ctx.fillText(pt.hours.toFixed(1)+'h', pt.x-8, pt.y-6);
+                    }
+                });
+                document.getElementById('chartNote').innerHTML = '📆 本年各月加班时数';
+            }
+        }
+        function initChartSwitch() {
+            let btns = document.querySelectorAll('.switch-option');
+            btns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    let idx = parseInt(btn.dataset.chart);
+                    if(isNaN(idx)) return;
+                    activeChartIndex = idx;
+                    btns.forEach(b=>b.classList.remove('active'));
+                    btn.classList.add('active');
+                    drawTrendChart();
+                });
+            });
+        }
+
+        function renderCalendar(start,end,today){
+            let days = getDaysArray(start,end);
+            let html = ['<div class="calendar-header">'+["一","二","三","四","五","六","日"].map(d=>`<span>${d}</span>`).join('')+'</div>'];
+            let blanks = (days[0].getDay()+6)%7;
+            let cells = Array(blanks).fill('').concat(days);
+            let data = loadData();
+            let row = [];
+            for(let i=0;i<cells.length;i++){
+                if(typeof cells[i]==='string') row.push('<div class="calendar-cell cell-blank"></div>');
+                else {
+                    let d = cells[i], key = formatDateKey(d);
+                    let overrideType = getDayTypeOverrides()[key];
+                    let baseType = getDayType(d);
+                    let effectiveType = overrideType || baseType;
+                    let isToday = d.toDateString() === today.toDateString();
+                    let h = data[key]?.h;
+                    let bar = '', valShow = '';
+                    if(h!=null && h>0){
+                        let maxLimit = (effectiveType === 'publicholiday' || effectiveType === 'holiday') ? 8 : 4;
+                        let frac = h/maxLimit;
+                        if(debugMode && h>maxLimit) frac=1;
+                        let widthPercent = Math.min(frac*100,100);
+                        let cls = widthPercent>=99?'full':(widthPercent>66?'warn':'');
+                        bar = `<div class="cell-ot-bar-bg"><div class="cell-ot-bar ${cls}" style="width:${widthPercent}%"></div></div>`;
+                        valShow = `<div class="cell-ot-num">${h}h</div>`;
+                    }
+                    let overrideClass = '';
+                    if(overrideType) overrideClass = `user-override-${overrideType}`;
+                    let attrs = '';
+                    if(effectiveType === 'publicholiday') attrs += ' data-pubholiday="1"';
+                    else if(effectiveType === 'holiday' && !overrideType) attrs += ' data-weekend="1"';
+                    let cls = (isToday?' today':'') + (overrideClass ? ' '+overrideClass : '');
+                    let starIcons = (overrideType === 'publicholiday') ? `<i class="fas fa-star" style="position:absolute; top:-7px; right:-12px; font-size:0.5em; color:#f0803c;"></i>` : (overrideType === 'holiday' ? `<i class="fas fa-star" style="position:absolute; top:-7px; right:-12px; font-size:0.5em; color:#9a49fa;"></i>` : '');
+                    row.push(`<div class="calendar-cell${cls}" data-datekey="${key}" ${attrs} onclick="onCellClick('${key}')"><div class="cell-date" style="position:relative;">${d.getDate()}${starIcons}</div>${bar}${valShow}</div>`);
+                }
+                if((i+1)%7===0 || i===cells.length-1){
+                    html.push(`<div class="calendar-row">${row.join('')}</div>`);
+                    row=[];
+                }
+            }
+            document.getElementById('calendar').innerHTML = html.join('');
+        }
+        function updateSummaryColumns(start,end){
+            let data=loadData();
+            let tempH=0,holiH=0,pubH=0,tempFee=0,holiFee=0,pubFee=0;
+            getDaysArray(start,end).forEach(d=>{
+                let key=formatDateKey(d);
+                let val=parseFloat(data[key]?.h)||0;
+                if(!val) return;
+                let wage=getWageForDate(d);
+                let mult = getMultiplier(d);
+                if(mult === 3) { pubH+=val; pubFee+=val*wage*3; }
+                else if(mult === 2) { holiH+=val; holiFee+=val*wage*2; }
+                else { tempH+=val; tempFee+=val*wage*1.5; }
+            });
+            let totalFee=tempFee+holiFee+pubFee;
+            document.getElementById('stats-columns').innerHTML=`<div class="stat-card"><i class="fa-regular fa-moon"></i><div class="stat-label">临时加班</div><div class="stat-hours">${tempH.toFixed(1)}<span style="font-size:0.6rem;">h</span></div><div class="stat-multiplier">1.5倍</div></div><div class="stat-card"><i class="fa-regular fa-sun"></i><div class="stat-label">假日加班</div><div class="stat-hours">${holiH.toFixed(1)}h</div><div class="stat-multiplier">2倍</div></div><div class="stat-card"><i class="fas fa-landmark"></i><div class="stat-label">国假加班</div><div class="stat-hours">${pubH.toFixed(1)}h</div><div class="stat-multiplier">3倍</div></div>`;
+            document.getElementById('total-salary').innerHTML=`<i class="fas fa-coins"></i> 加班薪资合计：<strong>￥${totalFee.toFixed(2)}</strong>`;
+        }
+        function updateHeaderContent(){
+            let total=getDaysArray(displayPeriod.start,displayPeriod.end).reduce((acc,d)=>acc+(parseFloat(loadData()[formatDateKey(d)]?.h)||0),0);
+            document.getElementById('total-hours-display').innerHTML=`${total.toFixed(1)}h`;
+            let icons={zero:'<i class="fas fa-spa"></i>',low:'<i class="fas fa-walking"></i>',mid:'<i class="fas fa-chart-line"></i>',high:'<i class="fas fa-fire"></i>',extreme:'<i class="fas fa-skull-crossbones"></i>'};
+            let msg='';
+            if(total<=0) msg=`${icons.zero} 本周加班为0，享受久违的悠闲吧`;
+            else if(total<10) msg=`${icons.low} 轻度加班，注意活动颈椎`;
+            else if(total<20) msg=`${icons.mid} 中度加班${total.toFixed(1)}h，周末补觉`;
+            else if(total<35) msg=`${icons.high} 高强度加班${total.toFixed(1)}h！安排休息`;
+            else msg=`${icons.extreme} 极限爆肝！${total.toFixed(1)}h！健康第一`;
+            document.getElementById('header-slogan').innerHTML=msg;
+        }
+        function updateFooterMotto() {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const diffTime = today - START_DATE;
+            const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const daysText = days >= 0 ? days : 0;
+            document.getElementById('running-days-text').textContent = `本站已运行 ${daysText} 天`;
+
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            const data = loadData();
+            let monthHours = 0;
+            const daysInMonth = getDaysArray(monthStart, monthEnd);
+            daysInMonth.forEach(d => {
+                const key = formatDateKey(d);
+                const h = parseFloat(data[key]?.h) || 0;
+                monthHours += h;
+            });
+
+            const mottoEl = document.querySelector('.motto-text');
+            if (!mottoEl) return;
+            let suffix = '';
+            if (monthHours > 30) {
+                suffix = ' — 也为了记住疲惫的刻度。';
+            } else if (monthHours === 0) {
+                suffix = ' — 每一段轻松的时光也值得留档。';
+            } else {
+                suffix = ' — 数字背后，是无数个夜晚。';
+            }
+            mottoEl.innerHTML = `记录，是为了抵抗遗忘。${suffix}`;
+        }
+        function showWageInput(){
+            let input = document.getElementById('hourly-wage');
+            if(input) input.value = getCurrentPeriodWage().toFixed(2);
+            const form = document.getElementById('wage-form');
+            if(form) {
+                form.onsubmit = (e) => {
+                    e.preventDefault();
+                    let v = parseFloat(document.getElementById('hourly-wage').value);
+                    if(isNaN(v)) v = 30;
+                    v = Math.max(0, v);
+                    if(v > 0) setCurrentPeriodWage(v);
+                    render();
+                    return false;
+                };
+            }
+        }
+        function updateProgressIconPosition(){
+            let inner=document.getElementById('progress-inner');
+            let icon=document.getElementById('progress-icon');
+            if(!inner||!icon) return;
+            let w=inner.parentElement.clientWidth;
+            let percent=parseFloat(inner.style.width)/100;
+            let left=Math.min(1,Math.max(0,percent))*w;
+            icon.style.left=left+'px';
+        }
+        function render(){
+            renderCalendar(displayPeriod.start, displayPeriod.end, new Date());
+            updateSummaryColumns(displayPeriod.start, displayPeriod.end);
+            showWageInput();
+            updateHeaderContent();
+            updateFooterMotto();
+            drawTrendChart();
+            let totalDays = Math.round((displayPeriod.end-displayPeriod.start)/86400000)+1;
+            let cur = Math.min(totalDays, Math.max(0, Math.round((new Date()-displayPeriod.start)/86400000)+1));
+            let percent = (cur/totalDays)*100;
+            document.getElementById('progress-inner').style.width = `${percent}%`;
+            setTimeout(updateProgressIconPosition,10);
+            document.getElementById('period-label').innerHTML = `考勤周期：${displayPeriod.start.getFullYear()}/${displayPeriod.start.getMonth()+1}/${displayPeriod.start.getDate()} - ${displayPeriod.end.getFullYear()}/${displayPeriod.end.getMonth()+1}/${displayPeriod.end.getDate()}`;
+        }
+        window.addEventListener('resize',()=>drawTrendChart());
+        document.getElementById('progress-inner').addEventListener('transitionend',updateProgressIconPosition);
+        initChartSwitch();
+        setupFoldLogic();
         render();
-        window.addEventListener('resize', () => { drawWeeklyChart(); updateProgressIconPosition(); });
-        document.getElementById('progress-inner').addEventListener('transitionend', updateProgressIconPosition);
-    </script>
+
+        const gear = document.getElementById('secret-gear'), menu = document.getElementById('secret-menu'), fileInput = document.getElementById('secret-file-input');
+        gear.addEventListener('click', (e) => { e.stopPropagation(); menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; });
+        document.addEventListener('click', () => { menu.style.display = 'none'; });
+        menu.addEventListener('click', (e) => e.stopPropagation());
+        document.getElementById('backup-btn').addEventListener('click', () => {
+            let data = { overtime: loadData(), dayTypeOverrides: getDayTypeOverrides(), periodWageMap: getPeriodWageMap() };
+            let json = JSON.stringify(data); let blob = new Blob([json], { type: 'application/json' }); let a = document.createElement('a');
+            a.download = `加班备份_${new Date().toISOString().slice(0,10)}.json`; a.href = URL.createObjectURL(blob); a.click(); URL.revokeObjectURL(a.href);
+            showToast('数据已备份'); menu.style.display = 'none';
+        });
+        document.getElementById('restore-btn').addEventListener('click', () => { fileInput.click(); });
+        fileInput.addEventListener('change', e => {
+            let file = e.target.files[0]; if (!file) return; let reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    let backup = JSON.parse(ev.target.result);
+                    if (backup.overtime) saveData(backup.overtime);
+                    if (backup.dayTypeOverrides) localStorage.setItem(DAY_TYPE_OVERRIDE_KEY, JSON.stringify(backup.dayTypeOverrides));
+                    if (backup.periodWageMap) localStorage.setItem(PERIOD_WAGE_KEY, JSON.stringify(backup.periodWageMap));
+                    showToast('数据已恢复'); setTimeout(() => location.reload(), 500);
+                } catch (ex) { alert('文件格式不正确'); }
+            };
+            reader.readAsText(file);
+            fileInput.value = '';
+        });
+    })();
+</script>
 </body>
 </html>
