@@ -395,7 +395,7 @@
         <div class="days-badge" id="days-badge">
             <i class="fas fa-mug-hot"></i> <span id="running-days-text">本站已运行 0 天</span>
         </div>
-        <div class="footer-note">Copyright © 2026 • YeoChing</div>
+        <div class="footer-note">Copyright reserved © 2026 • YeoChing_V5.0</div>
     </div>
 
     <div class="modal-mask" id="modal-mask">
@@ -842,9 +842,9 @@
             let msg='';
             if(total<=0) msg=`${icons.zero} 本周加班为0，享受久违的悠闲吧`;
             else if(total<10) msg=`${icons.low} 轻度加班，注意活动颈椎`;
-            else if(total<20) msg=`${icons.mid} 中度加班${total.toFixed(1)}h，周末补觉`;
-            else if(total<35) msg=`${icons.high} 高强度加班${total.toFixed(1)}h！安排休息`;
-            else msg=`${icons.extreme} 极限爆肝！${total.toFixed(1)}h！健康第一`;
+            else if(total<20) msg=`${icons.mid} 中度加班${total.toFixed(1)}h，周末记得补觉哦~`;
+            else if(total<35) msg=`${icons.high} 高强度加班${total.toFixed(1)}h！快快安排休息！`;
+            else msg=`${icons.extreme} 极限爆肝！${total.toFixed(1)}h！记得时刻紧备速效救心丸！`;
             document.getElementById('header-slogan').innerHTML=msg;
         }
         function updateFooterMotto() {
@@ -870,11 +870,11 @@
             if (!mottoEl) return;
             let suffix = '';
             if (monthHours > 30) {
-                suffix = ' — 也为了记住疲惫的刻度。';
+                suffix = '  也为了记住疲惫的刻度。';
             } else if (monthHours === 0) {
-                suffix = ' — 每一段轻松的时光也值得留档。';
+                suffix = '  每一段轻松的时光也值得留档。';
             } else {
-                suffix = ' — 数字背后，是无数个夜晚。';
+                suffix = '  数字背后，是无数个夜晚。';
             }
             mottoEl.innerHTML = `记录，是为了抵抗遗忘。${suffix}`;
         }
